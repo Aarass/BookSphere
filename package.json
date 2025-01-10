@@ -15,7 +15,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "api:serve": "tsx ./app/api/bin/www.ts",
+    "api:start": "tsx ./app/api/bin/www.ts",
     "api:watch": "tsx watch ./app/api/bin/dev.ts",
     "api:test": "echo \"Error: no test specified\" && exit 1",
     "api:build": "echo \"Not implemented\" && exit 1",
@@ -24,7 +24,9 @@
     "client:build": "vite build ./app/client/",
     "client:preview": "vite preview ./app/client/",
     "client:lint": "eslint ./app/client/",
-    "start": "run-p api:watch client:start"
+    "dbs:start": "docker-compose -f ./app/databases/compose.yaml up -d",
+    "dbs:stop": "docker-compose -f ./app/databases/compose.yaml stop",
+    "app:start": "run-p api:watch client:start"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.0.1",
@@ -52,4 +54,3 @@
     "vite": "^5.0.11"
   }
 }
-
