@@ -33,9 +33,11 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.5",
     "express": "^4.21.2",
+    "neo4j-driver": "^5.27.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-redux": "^9.1.0",
+    "redis": "^4.7.0",
     "vitest": "^2.1.8"
   },
   "devDependencies": {
