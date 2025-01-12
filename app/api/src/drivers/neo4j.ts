@@ -11,9 +11,18 @@ export async function query<T extends RecordShape>(
   );
 }
 
-export default driver;
+/**
+ * Acquire a session to communicate with the database.
+ *
+ * Make sure you always call close when you are done using a session!
+ *
+ * @returns new-session
+ */
+export function getSession() {
+  return driver.session({ database: "neo4j" });
+}
 
-let test = async () => {
+async () => {
   try {
     const serverInfo = await driver.getServerInfo();
     console.log("Connection to neo4j established");

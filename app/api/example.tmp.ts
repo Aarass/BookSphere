@@ -1,14 +1,10 @@
-import neo4j, { query } from "./src/drivers/neo4j";
-import redis from "./src/drivers/redis";
+import { query, getSession as getNeo4jSession } from "./src/drivers/neo4j";
+import { getClient as getRedisClient } from "./src/drivers/redis";
 
-interface User {
-  name: string;
-}
+import { User } from "@interfaces/user";
 
-// Neo4j
-//------------------------------------------
 (async () => {
-  let session = neo4j.session();
+  let session = getNeo4jSession();
 
   let users = await query<User>(
     session,
@@ -20,12 +16,9 @@ interface User {
 
   await session.close();
 })();
-//------------------------------------------
 
-//Redis
-//------------------------------------------
 (async () => {
-  let client = await redis.connect();
+  let client = getRedisClient();
 
   await client.set("key", "value");
   let value = await client.get("key");
@@ -34,4 +27,3 @@ interface User {
 
   await client.disconnect();
 })();
-//------------------------------------------
