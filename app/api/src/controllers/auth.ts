@@ -1,5 +1,12 @@
 import express from "express";
 import authService from "../services/auth";
+import { LoginDto } from "@interfaces/dtos/login";
+import { Genre } from "@interfaces/genre";
+
+let user: Genre = {
+  id: "",
+  name: "",
+};
 
 let router = express.Router();
 
@@ -16,6 +23,8 @@ declare module "express-serve-static-core" {
 }
 
 router.post("/login", function (req, res, next) {
+  const dto = req.body as LoginDto;
+
   authService.login("Aaras", "password");
 
   req.session.data = {
