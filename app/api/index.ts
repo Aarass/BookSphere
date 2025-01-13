@@ -1,22 +1,37 @@
-import express from "express";
-import sessionMiddleware from "./src/middlewares/session";
+import express, { Request } from "express";
 import corsMiddleware from "./src/middlewares/cors";
+import sessionMiddleware from "./src/middlewares/session";
+import { authenticate } from "./src/middlewares/authenticate";
 import authController from "./src/controllers/authController";
 import bookClubController from "./src/controllers/bookClubController";
-import { authenticate } from "./src/middlewares/authenticate";
+
+import { Server } from "socket.io";
+import { createServer } from "http";
+import { socketListener } from "./src/controllers/messageController";
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(corsMiddleware);
 app.use(sessionMiddleware);
 
-app.get("/", authenticate, (req, res) => {
-  res.send(`Hello, World!`);
-});
+io.engine.use(corsMiddleware);
+io.engine.use(sessionMiddleware);
+
+io.on("connection", socketListener);
 
 app.use("/", authController);
 app.use("/", bookClubController);
 
+server.listen(3000, () => {
+  console.log("server running at http://localhost:3000");
+});
+
 export default app;
+
+app.get("/", authenticate, (req, res) => {
+  res.send(`Hello, World!`);
+});

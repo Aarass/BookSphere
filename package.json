@@ -15,8 +15,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "api:start": "tsx ./app/api/bin/www.ts",
-    "api:watch": "tsx watch ./app/api/bin/dev.ts",
+    "api:start": "tsx ./app/api/index.ts",
+    "api:watch": "tsx watch ./app/api/index.ts",
     "api:test": "echo \"Error: no test specified\" && exit 1",
     "api:build": "echo \"Not implemented\" && exit 1",
     "client:dev": "vite ./app/client/",
@@ -43,6 +43,8 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.1.0",
     "redis": "^4.7.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "uuid": "^11.0.5",
     "vitest": "^2.1.8"
   },

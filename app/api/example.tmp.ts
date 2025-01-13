@@ -8,7 +8,8 @@ import { User } from "@interfaces/user";
 
   let users = await query<User>(
     session,
-    "Match (p:Person) return p.name as name"
+    "Match (p:Person) return p.name as name",
+    {}
   );
   users.forEach((user) => {
     console.log(user);
@@ -27,3 +28,12 @@ import { User } from "@interfaces/user";
 
   await client.disconnect();
 })();
+
+// TODO
+// app.use(sessionMiddleware);
+// io.use((socket, next) => {
+//   /** @ts-ignore */
+//   sessionMiddleware(socket.request, socket.request.res || {}, next);
+//   // sessionMiddleware(socket.request, socket.request.res, next); will not work with websocket-only
+//   // connections, as 'socket.request.res' will be undefined in that case
+// });

@@ -100,6 +100,26 @@ class BookClubRepository {
 
     session.close();
   }
+
+  async takeOwnershipOfRoom(bookClubId: string, roomId: string) {
+    let session = getSession();
+
+    let result = await session.run(
+      `MATCH (bookClub:BookClub {id: $bookClubId}), (room:Room {id: $roomId})
+       CREATE (bookClub)-[:OWNS]->(room)`,
+      {
+        bookClubId,
+        roomId,
+      }
+    );
+
+    let createdCount = result.summary.counters.updates().relationshipsCreated;
+    if (createdCount == 0) {
+      return Promise.reject("No relations created");
+    }
+
+    session.close();
+  }
 }
 
 export const bookClubRepository = new BookClubRepository();

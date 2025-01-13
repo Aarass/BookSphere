@@ -1,12 +1,12 @@
 export interface CreateRoomDto {
   title: string;
-  desc: string;
+  description: string;
 }
 
-export function isValidLoginDto(
+export function isValidCreateRoomDto(
   dto: Partial<CreateRoomDto>
 ): dto is CreateRoomDto {
-  if (!dto.title || !dto.desc) {
+  if (!dto.title || !dto.description) {
     return false;
   }
   return true;
