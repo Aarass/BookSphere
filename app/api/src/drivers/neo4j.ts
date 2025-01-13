@@ -4,9 +4,10 @@ let driver: Driver = neo4j.driver("neo4j://localhost");
 
 export async function query<T extends RecordShape>(
   session: Session,
-  query: String
+  query: String,
+  parameters: any
 ): Promise<T[]> {
-  return (await session.run<T>(query)).records.map((record) =>
+  return (await session.run<T>(query, parameters)).records.map((record) =>
     record.toObject()
   );
 }

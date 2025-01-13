@@ -1,7 +1,9 @@
 import express from "express";
 import authService from "../services/auth";
-import { LoginDto } from "@interfaces/dtos/login";
+import { isValidLoginDto, LoginDto } from "@interfaces/dtos/login";
 import { Genre } from "@interfaces/genre";
+import createHttpError from "http-errors";
+import { isValidRegisterDto, RegisterDto } from "@interfaces/dtos/register";
 
 let user: Genre = {
   id: "",
@@ -16,26 +18,56 @@ declare module "express-serve-static-core" {
   interface Request {
     session: {
       data: {
-        userId?: number;
+        userId?: string;
       };
     };
   }
 }
 
-router.post("/login", function (req, res, next) {
-  const dto = req.body as LoginDto;
+router.post("/login", async (req, res, next) => {
+  try {
+    const body = req.body as Partial<LoginDto>;
+    if (!isValidLoginDto(body)) {
+      return next(createHttpError(400, `Bad request`));
+    }
 
-  authService.login("Aaras", "password");
+    let user = await authService.login(body);
 
-  req.session.data = {
-    userId: 1,
-  };
+    req.session.data = {
+      userId: user.id,
+    };
 
-  res.send("respond with a resource");
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(401, `Login failed`));
+  }
 });
 
-router.post("/register", function (req, res, next) {
-  res.send("respond with a resource");
+router.post("/register", async (req, res, next) => {
+  try {
+    const body = req.body as Partial<RegisterDto>;
+    if (!isValidRegisterDto(body)) {
+      return next(createHttpError(400, `Bad request`));
+    }
+
+    await authService.register(body);
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(401, `Register failed`));
+  }
+});
+
+router.post("/logout", async (req, res, next) => {
+  try {
+    (req.session as any).destroy();
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(401, `Logout failed`));
+  }
 });
 
 export default router;
