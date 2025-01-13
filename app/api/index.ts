@@ -1,7 +1,8 @@
 import express from "express";
 import sessionMiddleware from "./src/middlewares/session";
 import corsMiddleware from "./src/middlewares/cors";
-import authController from "./src/controllers/auth";
+import authController from "./src/controllers/authController";
+import bookClubController from "./src/controllers/bookClubController";
 import { authenticate } from "./src/middlewares/authenticate";
 
 const app = express();
@@ -16,5 +17,6 @@ app.get("/", authenticate, (req, res) => {
 });
 
 app.use("/", authController);
+app.use("/", bookClubController);
 
 export default app;

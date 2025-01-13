@@ -1,14 +1,8 @@
 import express from "express";
-import authService from "../services/auth";
-import { isValidLoginDto, LoginDto } from "@interfaces/dtos/login";
-import { Genre } from "@interfaces/genre";
+import authService from "../services/authService";
+import { isValidLoginDto, LoginDto } from "@interfaces/dtos/loginDto";
 import createHttpError from "http-errors";
-import { isValidRegisterDto, RegisterDto } from "@interfaces/dtos/register";
-
-let user: Genre = {
-  id: "",
-  name: "",
-};
+import { isValidRegisterDto, RegisterDto } from "@interfaces/dtos/registerDto";
 
 let router = express.Router();
 
@@ -45,18 +39,17 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.post("/register", async (req, res, next) => {
+  const body = req.body as Partial<RegisterDto>;
+  if (!isValidRegisterDto(body)) {
+    return next(createHttpError(400, `Bad request`));
+  }
+
   try {
-    const body = req.body as Partial<RegisterDto>;
-    if (!isValidRegisterDto(body)) {
-      return next(createHttpError(400, `Bad request`));
-    }
-
     await authService.register(body);
-
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
-    return next(createHttpError(401, `Register failed`));
+    return next(createHttpError(400, `Register failed`));
   }
 });
 
@@ -66,7 +59,7 @@ router.post("/logout", async (req, res, next) => {
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
-    return next(createHttpError(401, `Logout failed`));
+    return next(createHttpError(400, `Logout failed`));
   }
 });
 
