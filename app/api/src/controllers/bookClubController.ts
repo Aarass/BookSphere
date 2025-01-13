@@ -25,8 +25,10 @@ router.post("/book-clubs", async (req, res, next) => {
 });
 
 router.get("/book-clubs", async (req, res, next) => {
+  let userId = req.session.data?.userId ?? null;
+
   try {
-    let clubs = await bookClubService.getAllBookClubs();
+    let clubs = await bookClubService.getAllBookClubs(userId);
     res.status(200).send(clubs);
   } catch (err) {
     console.error(err);

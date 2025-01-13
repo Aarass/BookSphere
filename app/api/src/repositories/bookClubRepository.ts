@@ -1,4 +1,4 @@
-import { BookClub } from "@interfaces/bookClub";
+import { BookClub, BookClubWithMembershipStatus } from "@interfaces/bookClub";
 import { getSession, query } from "../drivers/neo4j";
 import { v4 as uuidv4 } from "uuid";
 
@@ -30,15 +30,19 @@ class BookClubRepository {
     return result[0];
   }
 
-  async getAll() {
+  async getAll(userId: string | null) {
     let session = getSession();
-    let result = await query<BookClub>(
+    let result = await query<BookClubWithMembershipStatus>(
       session,
-      `MATCH (n:BookClub) return ${toBookClub("n")}`,
-      {}
+      `MATCH (b:BookClub)
+        OPTIONAL MATCH (:User {id: $userId})-[r:IS_MEMBER_OF]->(b) return ${toBookClub("b")},
+        CASE WHEN r IS NOT NULL THEN true ELSE false END AS isJoined`,
+      {
+        userId,
+      }
     );
-    session.close();
 
+    session.close();
     return result;
   }
 

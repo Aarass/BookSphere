@@ -5,8 +5,8 @@ async function createBookClub(data: CreateBookClubDto) {
   return await bookClubRepository.create(data.title, data.description);
 }
 
-async function getAllBookClubs() {
-  return await bookClubRepository.getAll();
+async function getAllBookClubs(userId: string | null) {
+  return await bookClubRepository.getAll(userId);
 }
 
 async function getJoinedBookClubs(userId: string) {

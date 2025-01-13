@@ -3,3 +3,7 @@ export interface BookClub {
   tittle: string;
   description: string;
 }
+
+export interface BookClubWithMembershipStatus extends BookClub {
+  isJoined: boolean;
+}
