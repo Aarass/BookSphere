@@ -21,7 +21,7 @@ class BookClubRepository {
       }
     );
 
-    session.close();
+    await session.close();
 
     if (result.length != 1) {
       throw "Internal error";
@@ -42,7 +42,7 @@ class BookClubRepository {
       }
     );
 
-    session.close();
+    await session.close();
     return result;
   }
 
@@ -55,7 +55,7 @@ class BookClubRepository {
         userId,
       }
     );
-    session.close();
+    await session.close();
 
     return result;
   }
@@ -79,7 +79,7 @@ class BookClubRepository {
       return Promise.reject("No relations created");
     }
 
-    session.close();
+    await session.close();
   }
 
   async leave(bookClubId: string, userId: string) {
@@ -98,7 +98,7 @@ class BookClubRepository {
       return Promise.reject("No relations deleted");
     }
 
-    session.close();
+    await session.close();
   }
 
   async takeOwnershipOfRoom(bookClubId: string, roomId: string) {
@@ -118,7 +118,7 @@ class BookClubRepository {
       return Promise.reject("No relations created");
     }
 
-    session.close();
+    await session.close();
   }
 }
 

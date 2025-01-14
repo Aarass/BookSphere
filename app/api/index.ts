@@ -5,6 +5,7 @@ import { authenticate } from "./src/middlewares/authenticate";
 import authController from "./src/controllers/authController";
 import bookClubController from "./src/controllers/bookClubController";
 import userController from "./src/controllers/userController";
+import bookController from "./src/controllers/bookController";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -27,6 +28,7 @@ io.on("connection", socketListener);
 app.use("/", authController);
 app.use("/", bookClubController);
 app.use("/", userController);
+app.use("/", bookController);
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");

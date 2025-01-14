@@ -2,7 +2,7 @@
 //   async fun(args: any) {
 //     let session = getSession();
 //     let result = await query<BookClub>(session, ``, {});
-//     session.close();
+//     await session.close();
 
 //     if (result.length != 1) {
 //       throw "Internal error";

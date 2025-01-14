@@ -13,7 +13,7 @@ class UserRepository {
       { id }
     );
 
-    session.close();
+    await session.close();
 
     if (result.length == 0) {
       return null;
@@ -34,7 +34,7 @@ class UserRepository {
       { username }
     );
 
-    session.close();
+    await session.close();
 
     if (result.length == 0) {
       return null;
@@ -68,7 +68,7 @@ class UserRepository {
         color,
       }
     );
-    session.close();
+    await session.close();
 
     if (result.length != 1) {
       throw "Internal error";

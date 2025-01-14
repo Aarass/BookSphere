@@ -21,7 +21,7 @@ class RoomRepository {
       }
     );
 
-    session.close();
+    await session.close();
 
     if (result.length != 1) {
       throw "Internal error";
@@ -40,7 +40,7 @@ class RoomRepository {
       { bookClubId }
     );
 
-    session.close();
+    await session.close();
     return result;
   }
 }
