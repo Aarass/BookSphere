@@ -128,4 +128,68 @@ router.get("/books/:isbn/stats", async (req, res, next) => {
   }
 });
 
+router.get("/books/ranked/:genre", async (req, res, next) => {
+  const genre = req.params["genre"];
+
+  try {
+    const rankedBooks = await bookService.getRankedBooksByGenre(genre);
+    res.status(200).json(rankedBooks);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, "Internal server error"));
+  }
+});
+
+router.post("/author/add", async (req, res, next) => {
+  const author = req.body;
+  try {
+    await bookService.addAuthor(author);
+    res.status(201).send("Author added successfully.");
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, "Failed to add author"));
+  }
+});
+
+router.post("/genre/add", async (req, res, next) => {
+  const genre = req.body;
+  try {
+    await bookService.addGenre(genre);
+    res.status(201).send("Genre added successfully.");
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, "Failed to add genre"));
+  }
+});
+
+router.post("/book/add", async (req, res, next) => {
+  const { isbn, title, description, imageUrl, authorId, genreIds } = req.body;
+
+  const book = {
+    isbn,
+    title,
+    description,
+    imageUrl,
+  };
+  try {
+    await bookService.addBook(book, authorId, genreIds);
+    res.status(201).send("Book added successfully.");
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, "Failed to add book"));
+  }
+});
+
+router.delete("/book/delete/:isbn", async (req, res, next) => {
+  const isbn = req.params.isbn;
+  try {
+    await bookService.removeBook(isbn);
+    res.status(200).send("Book deleted successfully.");
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, "Failed to delete book"));
+  }
+});
+
+
 export default router;

@@ -1,4 +1,7 @@
+import { BookRaw } from "@interfaces/book";
 import { Book } from "@interfaces/book";
+import { Genre } from "@interfaces/genre";
+import { Author } from "@interfaces/author";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
 import { getClient } from "../drivers/redis";
@@ -158,11 +161,158 @@ class BookRepository {
         getCommentsCountKey(isbn),
         getReadingCountKey(isbn),
       ])
-    ).map((s) => (s ? parseInt(s) : null));
+    ).map((s: any) => (s ? parseInt(s) : null));
 
     await redis.quit();
     return stats;
   }
+
+  async getBooksByGenre(genre: string): Promise<string[]> {
+    const session = getSession();
+    const result = await session.run(
+      `
+      MATCH (b:Book)-[:BELONGS_TO]->(:Genre {name: $genre})
+      RETURN b.isbn AS isbn
+      `,
+      { genre }
+    );
+
+    return result.records.map((record: any) => record.get('isbn'));
+  }
+
+  async getRankedBooksByGenre(genre: string): Promise<string[]> {
+    const redis = getClient();
+
+    const bookIsbns = await this.getBooksByGenre(genre);
+
+    const booksWithRatings = await Promise.all(
+      bookIsbns.map(async (isbn) => {
+        const count = await redis.get(getRatingsCountKey(isbn));
+        const sum = await redis.get(getRatingsSumKey(isbn));
+
+        const ratingsCount = count ? parseInt(count, 10) : 0;
+        const ratingsSum = sum ? parseInt(sum, 10) : 0;
+
+        const averageRating = ratingsCount > 0 ? ratingsSum / ratingsCount : 0;
+
+        return { isbn, averageRating };
+      })
+    );
+
+    booksWithRatings.sort((a, b) => b.averageRating - a.averageRating);
+
+    return booksWithRatings.map((book) => book.isbn);
+  }
+
+  async addAuthor(author: Author): Promise<void> {
+    const session = getSession();
+    try {
+      await session.run(
+        `MERGE (a:Author {id: $id, fullName: $fullName})`,
+        { id: author.id, fullName: author.fullName }
+      );
+    } finally {
+      await session.close();
+    }
+  }
+  
+  async addGenre(genre: Genre): Promise<void> {
+    const session = getSession();
+    try {
+      await session.run(
+        `MERGE (g:Genre {id: $id, name: $name})`,
+        { id: genre.id, name: genre.name }
+      );
+    } finally {
+      await session.close();
+    }
+  }
+
+  async addBook(book: BookRaw, authorId: string, genreIds: string[]): Promise<void> {
+    const session = getSession();
+    try {
+      console.log('Adding book:', book);
+      console.log('Author ID:', authorId);
+      console.log('Genre IDs:', genreIds);
+      
+  
+      const result = await session.run(
+        `MERGE (b:Book {isbn: $isbn, title: $title, description: $description, imageUrl: $imageUrl})
+         MERGE (a:Author {id: $authorId})
+         MERGE (a)-[:WROTE]->(b)`,
+        {
+          isbn: book.isbn,
+          title: book.title,
+          description: book.description,
+          imageUrl: book.imageUrl,
+          authorId: authorId,
+        }
+      );
+      console.log('Book and author added successfully:', result);
+  
+      for (const genreId of genreIds) {
+        const genreResult = await session.run(
+          `MATCH (b:Book {isbn: $isbn}), (g:Genre {id: $genreId})
+           MERGE (b)-[:BELONGS_TO]->(g)`,
+          { isbn: book.isbn, genreId: genreId }
+        );
+        console.log('Genre linked:', genreResult);
+      }
+    } catch (error) {
+      console.error('Error adding book:', error);
+      throw new Error('Failed to add book');
+    } finally {
+      await session.close();
+    }
+  }
+  
+
+  async deleteBook(isbn: string): Promise<void> {
+    const session = getSession();
+    try {
+      await session.run(
+        `MATCH (b:Book {isbn: $isbn})-[r]-()
+         DELETE r, b`,
+        { isbn }
+      );
+    } finally {
+      await session.close();
+    }
+  }
+  
+  async getAuthorById(authorId: string): Promise<void> {
+    const session = getSession();
+    try {
+      const result = await session.run(
+        `MATCH (a:Author {id: $authorId}) RETURN a`,
+        { authorId }
+      );
+  
+      if (result.records.length === 0) {
+        throw new Error(`Author with id ${authorId} does not exist.`);
+      }
+    } finally {
+      await session.close();
+    }
+  }
+
+  async getGenreById(genreId: string): Promise<void> {
+    const session = getSession();
+    try {
+      const result = await session.run(
+        `MATCH (g:Genre {id: $genreId}) RETURN g`,
+        { genreId }
+      );
+  
+      if (result.records.length === 0) {
+        throw new Error(`Genre with id ${genreId} does not exist.`);
+      }
+    } finally {
+      await session.close();
+    }
+  }
+  
+
 }
 
 const getRatingsSumKey = (isbn: string) => `ratings_sum:${isbn}`;

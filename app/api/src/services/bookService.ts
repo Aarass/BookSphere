@@ -3,6 +3,9 @@ import {
   CreateRatingDto,
   SetReadingStatus,
 } from "@interfaces/dtos/bookDto";
+import { BookRaw } from "@interfaces/book";
+import { Genre } from "@interfaces/genre";
+import { Author } from "@interfaces/author";
 import { bookRepository } from "../repositories/bookRepository";
 
 async function getBookByISBN(isbn: string) {
@@ -49,6 +52,31 @@ async function getStats(isbn: string) {
   return await bookRepository.getStats(isbn);
 }
 
+async function getRankedBooksByGenre(genre: string): Promise<string[]> {
+  return await bookRepository.getRankedBooksByGenre(genre);
+}
+
+async function addAuthor(author: Author): Promise<void> {
+  await bookRepository.addAuthor(author);
+}
+
+async function addGenre(genre: Genre): Promise<void> {
+  await bookRepository.addGenre(genre);
+}
+
+async function addBook(book: BookRaw, authorId: string, genreIds: string[]): Promise<void> {
+  await bookRepository.getAuthorById(authorId);
+  for (const genreId of genreIds) {
+    await bookRepository.getGenreById(genreId);
+  }
+
+  await bookRepository.addBook(book, authorId, genreIds);
+}
+
+async function removeBook(isbn: string): Promise<void> {
+  await bookRepository.deleteBook(isbn);
+}
+
 export default {
   getBookByISBN,
   getAllBooks,
@@ -58,4 +86,9 @@ export default {
   createRating,
   getRating,
   getStats,
+  getRankedBooksByGenre,
+  addAuthor,
+  addGenre,
+  addBook,
+  removeBook, 
 };
