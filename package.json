@@ -26,6 +26,7 @@
     "client:lint": "eslint ./app/client/",
     "dbs:start": "docker-compose -f ./app/databases/compose.yaml up -d",
     "dbs:stop": "docker-compose -f ./app/databases/compose.yaml stop",
+    "dbs:populate": "tsx ./app/databases/populate.ts",
     "app:start": "run-p api:watch client:start"
   },
   "dependencies": {
