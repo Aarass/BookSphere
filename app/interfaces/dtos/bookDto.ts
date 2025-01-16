@@ -1,3 +1,29 @@
+export interface CreateBookDto {
+  isbn: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  authorId: string;
+  genreIds: string[];
+}
+
+export function isValidCreateBookDto(
+  dto: Partial<CreateBookDto>
+): dto is CreateBookDto {
+  if (
+    !dto.isbn ||
+    !dto.title ||
+    !dto.description ||
+    !dto.imageUrl ||
+    !dto.authorId ||
+    !dto.genreIds ||
+    dto.genreIds.length == 0
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export interface SetReadingStatus {
   status: boolean;
 }

@@ -1,15 +1,40 @@
 import express from "express";
-
 import bookService from "../services/bookService";
 import createHttpError from "http-errors";
 import { authenticate } from "../middlewares/authenticate";
 import {
+  isValidCreateBookDto,
   isValidCreateCommentDto,
   isValidCreateRatingDto,
   isValidSetReadingStatus,
 } from "@interfaces/dtos/bookDto";
 
 let router = express.Router();
+
+router.post("/books", async (req, res, next) => {
+  const body = req.body;
+  if (!isValidCreateBookDto(body)) {
+    return next(createHttpError(400, `Bad request`));
+  }
+
+  try {
+    const book = await bookService.createBook(body);
+    res.status(201).send(book);
+  } catch (err) {
+    {
+      const e = err as {
+        type: string;
+        message: string;
+      };
+      if (e.type !== undefined && e.type == "customError") {
+        return next(createHttpError(500, e.message));
+      }
+    }
+
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
 
 router.get("/books", async (req, res, next) => {
   try {
@@ -27,6 +52,18 @@ router.get("/books/:isbn", async (req, res, next) => {
   try {
     let book = await bookService.getBookByISBN(isbn);
     res.status(200).send(book);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.delete("/books/:isbn", async (req, res, next) => {
+  const isbn = req.params["isbn"];
+
+  try {
+    await bookService.deleteBook(isbn);
+    res.sendStatus(200);
   } catch (err) {
     console.error(err);
     return next(createHttpError(500, `Something went wrong`));
@@ -128,6 +165,7 @@ router.get("/books/:isbn/stats", async (req, res, next) => {
   }
 });
 
+// TODO
 router.get("/books/ranked/:genre", async (req, res, next) => {
   const genre = req.params["genre"];
 
@@ -139,57 +177,5 @@ router.get("/books/ranked/:genre", async (req, res, next) => {
     return next(createHttpError(500, "Internal server error"));
   }
 });
-
-router.post("/author/add", async (req, res, next) => {
-  const author = req.body;
-  try {
-    await bookService.addAuthor(author);
-    res.status(201).send("Author added successfully.");
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(500, "Failed to add author"));
-  }
-});
-
-router.post("/genre/add", async (req, res, next) => {
-  const genre = req.body;
-  try {
-    await bookService.addGenre(genre);
-    res.status(201).send("Genre added successfully.");
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(500, "Failed to add genre"));
-  }
-});
-
-router.post("/book/add", async (req, res, next) => {
-  const { isbn, title, description, imageUrl, authorId, genreIds } = req.body;
-
-  const book = {
-    isbn,
-    title,
-    description,
-    imageUrl,
-  };
-  try {
-    await bookService.addBook(book, authorId, genreIds);
-    res.status(201).send("Book added successfully.");
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(500, "Failed to add book"));
-  }
-});
-
-router.delete("/book/delete/:isbn", async (req, res, next) => {
-  const isbn = req.params.isbn;
-  try {
-    await bookService.removeBook(isbn);
-    res.status(200).send("Book deleted successfully.");
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(500, "Failed to delete book"));
-  }
-});
-
 
 export default router;

@@ -1,183 +1,327 @@
-import { BookRaw } from "@interfaces/book";
 import { Book } from "@interfaces/book";
-import { Genre } from "@interfaces/genre";
-import { Author } from "@interfaces/author";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
 import { getClient } from "../drivers/redis";
 
 class BookRepository {
-  async getByISBN(isbn: string) {
+  async createBook(
+    isbn: string,
+    title: string,
+    description: string,
+    imageUrl: string,
+    authorId: string,
+    genreIds: string[]
+  ) {
     const session = getSession();
 
-    const result = await query<Book>(
-      session,
-      `MATCH (a:Author)-[:WROTE]->(b:Book {isbn: $isbn}) return ${toBook("b", "a")}`,
-      { isbn }
-    );
+    try {
+      const tx = session.beginTransaction();
+      try {
+        const result = await tx.run(
+          `
+          CREATE (b:Book {isbn: $isbn, title: $title, description: $description, imageUrl: $imageUrl}) WITH b
+          MATCH (a:Author {id: $authorId})
+          CREATE (a)-[:WROTE]->(b)
+
+          WITH b, a
+          UNWIND $genreIds as genreId
+            MATCH (g:Genre {id: genreId})
+            CREATE (b)-[:IS_OF_GENRE]->(g)
+          RETURN ${toRawBook("b")}, {id: a.id, fullName: a.fullName} as author, collect(genreId) as genreIds
+          `,
+          {
+            isbn,
+            title,
+            description,
+            imageUrl,
+            authorId,
+            genreIds,
+          }
+        );
+
+        const updates = result.summary.counters.updates();
+        if (updates.nodesCreated != 1) {
+          throw {
+            type: "customError",
+            message: "Book already exists",
+          };
+        } else if (updates.relationshipsCreated != 1 + genreIds.length) {
+          throw {
+            type: "customError",
+            message:
+              "Either authorId was wrong or some of the genreIds were wrong",
+          };
+        }
+
+        await tx.commit();
+
+        return result.records[0].toObject() as Book;
+      } catch (error) {
+        await tx.rollback();
+        throw error;
+      } finally {
+        await tx.close();
+      }
+
+      // const result = await query<Book>(
+      //   session,
+      //   `
+      //   MERGE (b:Book {isbn: $isbn, title: $title, description: $description, imageUrl: $imageUrl}) WITH b
+      //   MATCH (a:Author {id: $authorId})
+      //   MERGE (a)-[:WROTE]->(b)
+
+      //   WITH b, a
+      //   UNWIND $genreIds as genreId
+      //     MATCH (g:Genre {id: genreId})
+      //     MERGE (b)-[:IS_OF_GENRE]->(g)
+      //   RETURN ${toRawBook("b")}, {id: a.id, fullName: a.fullName} as author, collect(genreId) as genreIds
+      //   `,
+      //   {
+      //     isbn,
+      //     title,
+      //     description,
+      //     imageUrl,
+      //     authorId,
+      //     genreIds,
+      //   }
+      // );
+
+      // if (result.length != 1) {
+      //   throw "Internal error";
+      // }
+
+      // return result[0];
+    } finally {
+      await session.close();
+    }
+  }
+
+  async getByISBN(isbn: string) {
+    let result;
+
+    const session = getSession();
+    try {
+      result = await query<Book>(
+        session,
+        `MATCH (a:Author)-[:WROTE]->(b:Book {isbn: $isbn}) return ${toBook("b", "a")}`,
+        { isbn }
+      );
+    } finally {
+      await session.close();
+    }
 
     if (result.length != 1) {
       throw "Internal error";
     }
 
-    await session.close();
     return result[0];
   }
 
   async getAll() {
     const session = getSession();
 
-    const result = await query<Book>(
-      session,
-      `MATCH (a:Author)-[:WROTE]->(b:Book) RETURN ${toBook("b", "a")}`,
-      {}
-    );
+    try {
+      const result = await query<Book>(
+        session,
+        `MATCH (a:Author)-[:WROTE]->(b:Book) RETURN ${toBook("b", "a")}`,
+        {}
+      );
 
-    await session.close();
-    return result;
+      return result;
+    } finally {
+      await session.close();
+    }
+  }
+
+  async delete(isbn: string) {
+    const session = getSession();
+    try {
+      await session.run(`MATCH (b:Book {isbn: $isbn}) DETACH DELETE b`, {
+        isbn,
+      });
+    } finally {
+      await session.close();
+    }
   }
 
   async setReadingStatus(isbn: string, userId: string, status: boolean) {
     const neo4j = getSession();
-    const result = await neo4j.run(
-      `MATCH (b:Book {isbn: $isbn}), (u:User {id: $userId}) ${
-        status == true
-          ? `CREATE (u)-[:IS_READING {_start: $userId, _end: $isbn}]->(b)`
-          : `MATCH (u)-[r:IS_READING]->(b) DELETE r`
-      }`,
-      { isbn, userId }
-    );
-    await neo4j.close();
+    let isDatabaseModified;
+    try {
+      const result = await neo4j.run(
+        `MATCH (b:Book {isbn: $isbn}), (u:User {id: $userId}) ${
+          status == true
+            ? `CREATE (u)-[:IS_READING {_start: $userId, _end: $isbn}]->(b)`
+            : `MATCH (u)-[r:IS_READING]->(b) DELETE r`
+        }`,
+        { isbn, userId }
+      );
 
-    const updates = result.summary.counters.updates();
-    const isDatabaseModified =
-      updates.relationshipsDeleted > 0 || updates.relationshipsCreated > 0;
+      const updates = result.summary.counters.updates();
+      isDatabaseModified =
+        updates.relationshipsDeleted > 0 || updates.relationshipsCreated > 0;
+    } finally {
+      await neo4j.close();
+    }
 
     if (isDatabaseModified) {
       const redis = getClient();
-      if (status == true) {
-        await redis.INCR(getReadingCountKey(isbn));
-      } else {
-        await redis.DECR(getReadingCountKey(isbn));
+      try {
+        if (status == true) {
+          await redis.INCR(getReadingCountKey(isbn));
+        } else {
+          await redis.DECR(getReadingCountKey(isbn));
+        }
+      } finally {
+        await redis.quit();
       }
-      await redis.quit();
     }
   }
 
   async createComment(isbn: string, userId: string, content: string) {
     const neo4j = getSession();
 
-    const result = await query<Comment>(
-      neo4j,
-      `MATCH (u:User {id: $userId}), (b:Book {isbn: $isbn})
+    let result;
+    try {
+      result = await query<Comment>(
+        neo4j,
+        `MATCH (u:User {id: $userId}), (b:Book {isbn: $isbn})
       CREATE (u)-[r:HAS_COMMENTED {timestamp: $timestamp, comment: $content}]->(b)
       return ${toComment("r", "u", "b")}`,
-      {
-        timestamp: Date.now(),
-        userId,
-        isbn,
-        content,
-      }
-    );
-
-    await neo4j.close();
+        {
+          timestamp: Date.now(),
+          userId,
+          isbn,
+          content,
+        }
+      );
+    } finally {
+      await neo4j.close();
+    }
 
     if (result.length != 1) {
-      throw "Internal error";
+      throw "Couldn't create comment";
     }
 
     const redis = getClient();
-    await redis.INCR(getCommentsCountKey(isbn));
-    await redis.quit();
+    try {
+      await redis.INCR(getCommentsCountKey(isbn));
+    } finally {
+      await redis.quit();
+    }
 
     return result[0];
   }
 
   async getComments(isbn: string) {
     const session = getSession();
-    const result = await query<Comment>(
-      session,
-      `MATCH (u:User)-[r:HAS_COMMENTED]->(b:Book {isbn: $isbn})
-      RETURN ${toComment("r", "u", "b")}`,
-      { isbn }
-    );
-    await session.close();
+    try {
+      const result = await query<Comment>(
+        session,
+        `MATCH (u:User)-[r:HAS_COMMENTED]->(b:Book {isbn: $isbn})
+        RETURN ${toComment("r", "u", "b")}`,
+        { isbn }
+      );
 
-    return result;
+      return result;
+    } finally {
+      await session.close();
+    }
   }
 
   async createRating(isbn: string, userId: string, value: number) {
     const neo4j = getSession();
-    await neo4j.run(
-      `MATCH (u:User {id: $userId}), (b:Book {isbn: $isbn})
+    let result;
+    try {
+      result = await neo4j.run(
+        `MATCH (u:User {id: $userId}), (b:Book {isbn: $isbn})
       CREATE (u)-[:HAS_RATED {value: $value, _start: $userId, _end: $isbn}]->(b)`,
-      {
-        userId,
-        isbn,
-        value,
-      }
-    );
-    await neo4j.close();
+        {
+          userId,
+          isbn,
+          value,
+        }
+      );
+    } finally {
+      await neo4j.close();
+    }
+
+    const updates = result.summary.counters.updates();
+    if (updates.relationshipsCreated != 1) {
+      throw "Couldn't create rating";
+    }
 
     const redis = getClient();
-    await redis.INCR(getRatingsCountKey(isbn));
-    await redis.INCRBY(getRatingsSumKey(isbn), value);
-    await redis.quit();
+    try {
+      await redis.INCR(getRatingsCountKey(isbn));
+      await redis.INCRBY(getRatingsSumKey(isbn), value);
+    } finally {
+      await redis.quit();
+    }
   }
 
   async getRating(isbn: string, userId: string) {
     const session = getSession();
 
-    const result = await query<Rating>(
-      session,
-      `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: $isbn})
+    try {
+      const result = await query<Rating>(
+        session,
+        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: $isbn})
       RETURN ${toRating("r", "u", "b")}`,
-      {
-        userId,
-        isbn,
+        {
+          userId,
+          isbn,
+        }
+      );
+
+      if (result.length > 1) {
+        throw "Internal error";
       }
-    );
 
-    await session.close();
-
-    if (result.length > 1) {
-      throw "Internal error";
-    }
-
-    if (result.length == 1) {
-      return result[0];
-    } else {
-      return null;
+      if (result.length == 1) {
+        return result[0];
+      } else {
+        return null;
+      }
+    } finally {
+      await session.close();
     }
   }
 
   async getStats(isbn: string) {
     const redis = getClient();
 
-    const stats = (
-      await redis.mGet([
-        getRatingsSumKey(isbn),
-        getRatingsCountKey(isbn),
-        getCommentsCountKey(isbn),
-        getReadingCountKey(isbn),
-      ])
-    ).map((s: any) => (s ? parseInt(s) : null));
+    try {
+      const stats = (
+        await redis.mGet([
+          getRatingsSumKey(isbn),
+          getRatingsCountKey(isbn),
+          getCommentsCountKey(isbn),
+          getReadingCountKey(isbn),
+        ])
+      ).map((s: any) => (s ? parseInt(s) : null));
 
-    await redis.quit();
-    return stats;
+      return stats;
+    } finally {
+      await redis.quit();
+    }
   }
 
   async getBooksByGenre(genre: string): Promise<string[]> {
     const session = getSession();
-    const result = await session.run(
-      `
+    try {
+      const result = await session.run(
+        `
       MATCH (b:Book)-[:BELONGS_TO]->(:Genre {name: $genre})
       RETURN b.isbn AS isbn
       `,
-      { genre }
-    );
+        { genre }
+      );
 
-    return result.records.map((record: any) => record.get('isbn'));
+      return result.records.map((record: any) => record.get("isbn"));
+    } finally {
+      await session.close();
+    }
   }
 
   async getRankedBooksByGenre(genre: string): Promise<string[]> {
@@ -203,116 +347,6 @@ class BookRepository {
 
     return booksWithRatings.map((book) => book.isbn);
   }
-
-  async addAuthor(author: Author): Promise<void> {
-    const session = getSession();
-    try {
-      await session.run(
-        `MERGE (a:Author {id: $id, fullName: $fullName})`,
-        { id: author.id, fullName: author.fullName }
-      );
-    } finally {
-      await session.close();
-    }
-  }
-  
-  async addGenre(genre: Genre): Promise<void> {
-    const session = getSession();
-    try {
-      await session.run(
-        `MERGE (g:Genre {id: $id, name: $name})`,
-        { id: genre.id, name: genre.name }
-      );
-    } finally {
-      await session.close();
-    }
-  }
-
-  async addBook(book: BookRaw, authorId: string, genreIds: string[]): Promise<void> {
-    const session = getSession();
-    try {
-      console.log('Adding book:', book);
-      console.log('Author ID:', authorId);
-      console.log('Genre IDs:', genreIds);
-      
-  
-      const result = await session.run(
-        `MERGE (b:Book {isbn: $isbn, title: $title, description: $description, imageUrl: $imageUrl})
-         MERGE (a:Author {id: $authorId})
-         MERGE (a)-[:WROTE]->(b)`,
-        {
-          isbn: book.isbn,
-          title: book.title,
-          description: book.description,
-          imageUrl: book.imageUrl,
-          authorId: authorId,
-        }
-      );
-      console.log('Book and author added successfully:', result);
-  
-      for (const genreId of genreIds) {
-        const genreResult = await session.run(
-          `MATCH (b:Book {isbn: $isbn}), (g:Genre {id: $genreId})
-           MERGE (b)-[:BELONGS_TO]->(g)`,
-          { isbn: book.isbn, genreId: genreId }
-        );
-        console.log('Genre linked:', genreResult);
-      }
-    } catch (error) {
-      console.error('Error adding book:', error);
-      throw new Error('Failed to add book');
-    } finally {
-      await session.close();
-    }
-  }
-  
-
-  async deleteBook(isbn: string): Promise<void> {
-    const session = getSession();
-    try {
-      await session.run(
-        `MATCH (b:Book {isbn: $isbn})-[r]-()
-         DELETE r, b`,
-        { isbn }
-      );
-    } finally {
-      await session.close();
-    }
-  }
-  
-  async getAuthorById(authorId: string): Promise<void> {
-    const session = getSession();
-    try {
-      const result = await session.run(
-        `MATCH (a:Author {id: $authorId}) RETURN a`,
-        { authorId }
-      );
-  
-      if (result.records.length === 0) {
-        throw new Error(`Author with id ${authorId} does not exist.`);
-      }
-    } finally {
-      await session.close();
-    }
-  }
-
-  async getGenreById(genreId: string): Promise<void> {
-    const session = getSession();
-    try {
-      const result = await session.run(
-        `MATCH (g:Genre {id: $genreId}) RETURN g`,
-        { genreId }
-      );
-  
-      if (result.records.length === 0) {
-        throw new Error(`Genre with id ${genreId} does not exist.`);
-      }
-    } finally {
-      await session.close();
-    }
-  }
-  
-
 }
 
 const getRatingsSumKey = (isbn: string) => `ratings_sum:${isbn}`;
@@ -384,6 +418,12 @@ function tests() {
       if (false) {
         let tmp = await bookRepository.getStats("0-7567-5189-6");
         console.log(tmp);
+      }
+
+      if (false) {
+        bookRepository.createBook("1", "Title", "Description", "asd.jpg", "1", [
+          "2",
+        ]);
       }
     } catch (err) {
       console.log(err);
