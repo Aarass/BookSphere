@@ -6,8 +6,7 @@ import { isValidRegisterDto, RegisterDto } from "@interfaces/dtos/registerDto";
 
 let router = express.Router();
 
-// TODO
-// add all fileds
+// TODO add more fileds if needed
 declare module "express-serve-static-core" {
   interface Request {
     session: {

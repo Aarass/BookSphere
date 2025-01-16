@@ -27,7 +27,7 @@ async function register(data: RegisterDto) {
   }
 
   try {
-    await userRepository.createUser(
+    return await userRepository.createUser(
       data.username,
       data.password,
       data.firstName,

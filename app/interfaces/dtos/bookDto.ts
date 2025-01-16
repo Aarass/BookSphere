@@ -54,6 +54,8 @@ export interface CreateRatingDto {
   value: number;
 }
 
+export type UpdateRatingDto = CreateRatingDto;
+
 export function isValidCreateRatingDto(
   dto: Partial<CreateRatingDto>
 ): dto is CreateRatingDto {

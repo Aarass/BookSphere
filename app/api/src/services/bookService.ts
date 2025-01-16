@@ -1,13 +1,9 @@
-import {
-  CreateBookDto,
-  CreateCommentDto,
-  CreateRatingDto,
-  SetReadingStatus,
-} from "@interfaces/dtos/bookDto";
+import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
+import { statsRepository } from "../repositories/statsRepository";
 
 async function createBook(dto: CreateBookDto) {
-  return await bookRepository.createBook(
+  const book = await bookRepository.createBook(
     dto.isbn,
     dto.title,
     dto.description,
@@ -15,6 +11,12 @@ async function createBook(dto: CreateBookDto) {
     dto.authorId,
     dto.genreIds
   );
+
+  setImmediate(async () => {
+    await statsRepository.onBookCreated(book);
+  });
+
+  return book;
 }
 
 async function getBookByISBN(isbn: string) {
@@ -25,8 +27,14 @@ async function getAllBooks() {
   return await bookRepository.getAll();
 }
 
-async function deleteBook(isbn: string): Promise<void> {
-  await bookRepository.delete(isbn);
+async function deleteBook(isbn: string) {
+  const deletedBook = await bookRepository.delete(isbn);
+
+  setImmediate(async () => {
+    statsRepository.onBookDeleted(deletedBook);
+  });
+
+  return deletedBook;
 }
 
 async function setReadingStatus(
@@ -34,39 +42,21 @@ async function setReadingStatus(
   userId: string,
   dto: SetReadingStatus
 ) {
-  return await bookRepository.setReadingStatus(isbn, userId, dto.status);
-}
+  const { hasChanged } = await bookRepository.setReadingStatus(
+    isbn,
+    userId,
+    dto.status
+  );
 
-async function createComment(
-  isbn: string,
-  userId: string,
-  dto: CreateCommentDto
-) {
-  return await bookRepository.createComment(isbn, userId, dto.content);
-}
-
-async function getComments(isbn: string) {
-  return await bookRepository.getComments(isbn);
-}
-
-async function createRating(
-  isbn: string,
-  userId: string,
-  dto: CreateRatingDto
-) {
-  return await bookRepository.createRating(isbn, userId, dto.value);
-}
-
-async function getRating(isbn: string, userId: string) {
-  return await bookRepository.getRating(isbn, userId);
+  if (hasChanged) {
+    setImmediate(async () => {
+      await statsRepository.onReadingStatusChanged(isbn, dto.status);
+    });
+  }
 }
 
 async function getStats(isbn: string) {
-  return await bookRepository.getStats(isbn);
-}
-
-async function getRankedBooksByGenre(genre: string): Promise<string[]> {
-  return await bookRepository.getRankedBooksByGenre(genre);
+  return await statsRepository.getStats(isbn);
 }
 
 export default {
@@ -75,11 +65,5 @@ export default {
   getAllBooks,
   deleteBook,
   setReadingStatus,
-  createComment,
-  getComments,
-  createRating,
-  getRating,
   getStats,
-  //
-  getRankedBooksByGenre,
 };

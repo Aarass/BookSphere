@@ -8,6 +8,7 @@ import userController from "./src/controllers/userController";
 import bookController from "./src/controllers/bookController";
 import authorController from "./src/controllers/authorController";
 import genreController from "./src/controllers/genreController";
+import leaderboardController from "./src/controllers/leaderboardController";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -33,6 +34,7 @@ app.use("/", userController);
 app.use("/", bookController);
 app.use("/", authorController);
 app.use("/", genreController);
+app.use("/", leaderboardController);
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");

@@ -13,6 +13,10 @@ export interface Book extends BookRaw {
   genres: Genre[];
 }
 
+export interface BookWithScore extends Book {
+  score: number;
+}
+
 export interface BookStats {
   ratingsCount: number;
   ratingsSum: number;

@@ -29,7 +29,6 @@ import { User } from "@interfaces/user";
   await client.disconnect();
 })();
 
-// TODO
 // app.use(sessionMiddleware);
 // io.use((socket, next) => {
 //   /** @ts-ignore */

@@ -63,7 +63,8 @@ class BookClubRepository {
   async join(bookClubId: string, userId: string) {
     let session = getSession();
     // TODO _maybe_
-    // Maybe we should check if relations is already there. This way, duplicate relation could be created.
+    // Maybe we should check if relations is already there.
+    // This way, duplicate relation could be created, but it's not a big deal
 
     let result = await session.run(
       `MATCH (user:User {id: $userId}), (bookClub:BookClub {id: $bookClubId})

@@ -1,5 +1,7 @@
 import express from "express";
 import bookService from "../services/bookService";
+import ratingService from "../services/ratingService";
+import commentService from "../services/commentService";
 import createHttpError from "http-errors";
 import { authenticate } from "../middlewares/authenticate";
 import {
@@ -102,7 +104,7 @@ router.post("/books/:isbn/comments", authenticate, async (req, res, next) => {
   }
 
   try {
-    const newComment = await bookService.createComment(isbn, userId, body);
+    const newComment = await commentService.createComment(isbn, userId, body);
     res.status(200).send(newComment);
   } catch (err) {
     console.error(err);
@@ -114,7 +116,7 @@ router.get("/books/:isbn/comments", async (req, res, next) => {
   const isbn = req.params["isbn"];
 
   try {
-    const comments = await bookService.getComments(isbn);
+    const comments = await commentService.getComments(isbn);
     res.status(200).send(comments);
   } catch (err) {
     console.error(err);
@@ -132,7 +134,7 @@ router.put("/books/:isbn/ratings", authenticate, async (req, res, next) => {
   }
 
   try {
-    await bookService.createRating(isbn, userId, body);
+    await ratingService.createRating(isbn, userId, body);
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
@@ -145,7 +147,7 @@ router.get("/books/:isbn/ratings/my", authenticate, async (req, res, next) => {
   const userId = req.session.data.userId!;
 
   try {
-    const rating = await bookService.getRating(isbn, userId);
+    const rating = await ratingService.getUserRating(isbn, userId);
     res.status(200).send(rating);
   } catch (err) {
     console.error(err);
@@ -162,19 +164,6 @@ router.get("/books/:isbn/stats", async (req, res, next) => {
   } catch (err) {
     console.error(err);
     return next(createHttpError(500, `Something went wrong`));
-  }
-});
-
-// TODO
-router.get("/books/ranked/:genre", async (req, res, next) => {
-  const genre = req.params["genre"];
-
-  try {
-    const rankedBooks = await bookService.getRankedBooksByGenre(genre);
-    res.status(200).json(rankedBooks);
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(500, "Internal server error"));
   }
 });
 
