@@ -8,7 +8,7 @@ async function createRating(
   userId: string,
   dto: CreateRatingDto
 ) {
-  const { genreIds } = await bookRepository.createRating(
+  const { ids: genreIds } = await bookRepository.createRating(
     isbn,
     userId,
     dto.value
@@ -16,7 +16,7 @@ async function createRating(
 
   setImmediate(async () => {
     await statsRepository.onRatingCreated(isbn, dto.value);
-    await leaderboardRepository.updateRatingLeaderboard(isbn, "global");
+    await leaderboardRepository.updateRatingLeaderboards(isbn, genreIds);
   });
 }
 
@@ -34,7 +34,7 @@ async function updateRating(
   setImmediate(async () => {
     const diff = dto.value - oldValue;
     await statsRepository.onRatingUpdated(isbn, diff);
-    await leaderboardRepository.updateRatingLeaderboard(isbn, "global");
+    await leaderboardRepository.updateRatingLeaderboards(isbn, genreIds);
   });
 }
 
@@ -43,7 +43,7 @@ async function deleteRating(isbn: string, userId: string) {
 
   setImmediate(async () => {
     await statsRepository.onRatingDeleted(isbn, value);
-    await leaderboardRepository.updateRatingLeaderboard(isbn, "global");
+    await leaderboardRepository.updateRatingLeaderboards(isbn, genreIds);
   });
 }
 

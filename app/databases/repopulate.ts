@@ -89,22 +89,47 @@ import leaderboardService from "app/api/src/services/leaderboardService";
 
     await ratingService.createRating(dune.isbn, aaras.id, { value: 3 });
     await ratingService.createRating(dune.isbn, mix.id, { value: 4 });
+    // Rating/Commenting/Reading Operations need some time to be sent to the leaderboard
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Leaderboard might need some time to recieve updates
-    // await new Promise((resolve) => setTimeout(resolve, 200));
-
-    // const result = await leaderboardService.getBooksFromLeaderboard(
+    // console.time("leaderboard");
+    // const globalLeaderboard = await leaderboardService.getBooksFromLeaderboard(
     //   "rating",
     //   "global",
     //   {}
     // );
-    // console.log("LB: ", result);
+    // console.log("Global");
+    // console.log("----------------------------------------------------------");
+    // globalLeaderboard.forEach((entry) => console.log(entry));
+    // console.log("----------------------------------------------------------");
 
-    const deletedBook = await bookService.deleteBook(prince.isbn);
-    // console.log(deletedBook);
+    // const scienceFantasyLeaderboard =
+    //   await leaderboardService.getBooksFromLeaderboard(
+    //     "rating",
+    //     scienceFantasy.id,
+    //     {}
+    //   );
+    // console.log("Science");
+    // console.log("----------------------------------------------------------");
+    // scienceFantasyLeaderboard.forEach((entry) => console.log(entry));
+    // console.log("----------------------------------------------------------");
 
-    const stats = await bookService.getStats(dune.isbn);
-    console.log("Stats: ", stats);
+    // const childrensLiteratureLeaderboard =
+    //   await leaderboardService.getBooksFromLeaderboard(
+    //     "rating",
+    //     childrensLiterature.id,
+    //     {}
+    //   );
+    // console.log("Childrens");
+    // console.log("----------------------------------------------------------");
+    // childrensLiteratureLeaderboard.forEach((entry) => console.log(entry));
+    // console.log("----------------------------------------------------------");
+    // console.timeEnd("leaderboard");
+
+    // await bookService.deleteBook(prince.isbn);
+
+    // const stats = await bookService.getStats(dune.isbn);
+    // console.log("Stats: ", stats);
   } catch (err) {
     console.error(err);
   } finally {

@@ -1,43 +1,24 @@
 import { Book } from "@interfaces/book";
 import { getClient } from "../drivers/redis";
 import { getLbKey } from "./leaderboardRepository";
-import { stat } from "fs";
 
 class StatsRepository {
-  async onBookCreated(book: Book) {
-    const redis = getClient();
-    try {
-      const gRatings = getLbKey("rating", "global");
-      const gReaders = getLbKey("readers", "global");
-      await redis
-        .multi()
-        .zAdd(gRatings, { score: 0, value: book.isbn })
-        .zAdd(gReaders, { score: 0, value: book.isbn })
-        .execAsPipeline();
-
-      // TODO when lb with genres
-      // This is where entries for genres should be created
-    } finally {
-      redis.quit();
-    }
-  }
-
   async onBookDeleted(book: Book) {
     const redis = getClient();
     try {
-      const gRatings = getLbKey("rating", "global");
-      const gReaders = getLbKey("readers", "global");
-      await redis
-        .multi()
-        .zRem(gRatings, book.isbn)
-        .zRem(gReaders, book.isbn)
-        .del(getCommentsCountKey(book.isbn))
-        .del(getRatingsCountKey(book.isbn))
-        .del(getRatingsSumKey(book.isbn))
-        .execAsPipeline();
+      const multi = redis.multi();
+      multi.del(getCommentsCountKey(book.isbn));
+      multi.del(getRatingsCountKey(book.isbn));
+      multi.del(getRatingsSumKey(book.isbn));
 
-      // TODO when lb with genres
-      // This is where entries for genres should be deleted
+      for (const genre of book.genres) {
+        multi.zRem(getLbKey("rating", genre.id), book.isbn);
+        multi.zRem(getLbKey("readers", genre.id), book.isbn);
+      }
+      multi.zRem(getLbKey("rating", "global"), book.isbn);
+      multi.zRem(getLbKey("readers", "global"), book.isbn);
+
+      await multi.execAsPipeline();
     } finally {
       redis.quit();
     }
@@ -118,7 +99,7 @@ class StatsRepository {
           .get(getCommentsCountKey(isbn))
           .zScore(getLbKey("readers", "global"), isbn)
           .execAsPipeline()
-      ).map((s: any) => (s ? parseInt(s) : null));
+      ).map((s: any) => (s ? parseInt(s) : 0));
 
       return stats;
     } finally {
