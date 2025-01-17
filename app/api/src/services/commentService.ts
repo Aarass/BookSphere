@@ -16,13 +16,23 @@ async function createComment(
   return comment;
 }
 
-// TODO
+
 async function deleteComment(
   isbn: string,
   userId: string,
   dto: CreateCommentDto
 ) {
-  throw new Error("Method not implemented.");
+  const result = await bookRepository.deleteComment(isbn, userId, dto);
+
+  setImmediate(async () => {
+    try {
+      await statsRepository.onCommentDeleted(isbn);
+    } catch (error) {
+      console.error("Error updating stats after comment deletion:", error);
+    }
+  });
+
+  return result;
 }
 
 async function getComments(isbn: string) {
@@ -32,4 +42,5 @@ async function getComments(isbn: string) {
 export default {
   createComment,
   getComments,
+  deleteComment,
 };

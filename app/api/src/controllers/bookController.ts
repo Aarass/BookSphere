@@ -124,6 +124,25 @@ router.get("/books/:isbn/comments", async (req, res, next) => {
   }
 });
 
+router.delete("/books/:isbn/comments", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  const body = req.body;
+  if (!isValidCreateCommentDto(body)) {
+    return next(createHttpError(400, `Bad request`));
+  }
+
+  try {
+    const result = await commentService.deleteComment(isbn, userId, body);
+    res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+
 router.put("/books/:isbn/ratings", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
   const userId = req.session.data.userId!;

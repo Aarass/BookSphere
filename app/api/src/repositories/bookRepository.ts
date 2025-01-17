@@ -1,6 +1,7 @@
 import { Book, BookWithScore } from "@interfaces/book";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
+import { CreateCommentDto } from "@interfaces/dtos/bookDto";
 class BookRepository {
   async createBook(
     isbn: string,
@@ -182,6 +183,35 @@ class BookRepository {
     }
 
     return result[0];
+  }
+
+  async deleteComment(isbn: string, userId: string, dto: CreateCommentDto) {
+    const neo4j = getSession();
+
+    let result;
+    try {
+      result = await neo4j.run(
+        `MATCH (u:User {id: $userId})-[r:HAS_COMMENTED {comment: $content}]->(b:Book {isbn: $isbn})
+        DELETE r
+        RETURN u, b`,
+        {
+          userId,
+          isbn,
+          content: dto.content,
+        }
+      )
+      
+      const updates = result.summary.counters.updates();
+      if (updates.relationshipsDeleted != 1) {
+        throw "Couldn't delete commennt";
+      }
+
+      return { message: "Comment deleted successfully" };
+      
+    } finally {
+      await neo4j.close();
+    }
+
   }
 
   async getComments(isbn: string) {
