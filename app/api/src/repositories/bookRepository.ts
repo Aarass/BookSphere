@@ -265,7 +265,32 @@ class BookRepository {
     isbn: string,
     userId: string
   ): Promise<{ genreIds: string[]; value: number }> {
-    throw new Error("Method not implemented."); 
+    const session = getSession();
+    let result;
+
+    try{
+      result = await session.run(
+        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: %isbn})
+        WITH b, r.value AS value
+        DELETE r
+        RETURN ${toGenreIds("b")}, value`,
+        {userId, isbn}
+      );
+
+    }finally{
+      await session.close();
+    }
+
+    if(result.records.length != 1){
+      throw "Coulden't delete rating";
+    }
+
+    const record = result.records[0].toObject();
+    
+    return {
+      genreIds: record.genreIds,
+      value: record.value
+    }
   }
 
   // TODO

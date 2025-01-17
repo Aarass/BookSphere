@@ -180,6 +180,18 @@ router.put("/books/:isbn/ratings", authenticate, async (req, res, next) => {
   }
 });
 
+router.delete("/books/:isbn/ratings", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  try {
+    await ratingService.deleteRating(isbn, userId);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
 
 
 
