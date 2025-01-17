@@ -257,7 +257,7 @@ class BookRepository {
       throw `Internal error`;
     }
 
-    return result.records[0].toObject() as { genreIds: string[] };
+    return result.records[0].toObject() as { ids: string[] };
   }
 
   // TODO

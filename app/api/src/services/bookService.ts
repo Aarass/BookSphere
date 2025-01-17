@@ -12,10 +12,6 @@ async function createBook(dto: CreateBookDto) {
     dto.genreIds
   );
 
-  setImmediate(async () => {
-    await statsRepository.onBookCreated(book);
-  });
-
   return book;
 }
 

@@ -4,14 +4,19 @@ import { bookRepository } from "../repositories/bookRepository";
 
 async function getBooksFromLeaderboard(
   criteria: "rating" | "readers",
-  genre: "global",
+  genreId: string,
   dto: ReadLeaderboardDto
 ) {
   const scoresAndISBNs = await leaderboardRepository.getBookIdsFromLeaderboard(
     criteria,
-    genre,
+    genreId,
     dto.cursor
   );
+
+  if (scoresAndISBNs.length === 0) {
+    return [];
+  }
+
   const books = await bookRepository.mapToBooksWithScore(scoresAndISBNs);
   return books;
 }

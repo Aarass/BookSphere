@@ -4,14 +4,9 @@ import leaderboardService from "../services/leaderboardService";
 
 const router = express.Router();
 
-router.get("/leaderboards/:criteria/:genre", async (req, res, next) => {
+router.get("/leaderboards/:criteria/:genreId", async (req, res, next) => {
   const criteria = req.params["criteria"];
-  const genre = req.params["genre"];
-
-  // TODO remove this one when implemented
-  if (genre != "global") {
-    return next(createHttpError(501, `Not implemented yet`));
-  }
+  const genreId = req.params["genreId"];
 
   if (criteria !== "rating" && criteria !== "readers") {
     return next(createHttpError(501, `Not implemented yet`));
@@ -20,7 +15,7 @@ router.get("/leaderboards/:criteria/:genre", async (req, res, next) => {
   try {
     const books = await leaderboardService.getBooksFromLeaderboard(
       criteria,
-      genre,
+      genreId,
       req.body
     );
     res.status(200).send(books);

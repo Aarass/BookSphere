@@ -5,7 +5,7 @@ import { getRatingsCountKey, getRatingsSumKey } from "./statsRepository";
 class LeaderboardRepository {
   async getBookIdsFromLeaderboard(
     criteria: "rating" | "readers",
-    genre: "global",
+    genre: string,
     cursor: number | undefined
   ) {
     const lbKey = getLbKey(criteria, genre);
@@ -30,7 +30,7 @@ class LeaderboardRepository {
   /**
    * Should be called after someone rated a book
    */
-  async updateRatingLeaderboard(isbn: string, genre: "global") {
+  async updateRatingLeaderboards(isbn: string, genreIds: string[]) {
     const redis = getClient();
 
     const ratingsCountKey = getRatingsCountKey(isbn);
@@ -55,18 +55,25 @@ class LeaderboardRepository {
       const [count, sum] = [parseInt(sCount), parseInt(sSum)];
       const avg = count === 0 ? 0 : sum / count;
 
-      const lbKey = getLbKey("rating", genre);
-      await redis.multi().zAdd(lbKey, { value: isbn, score: avg }).exec();
+      const multi = redis.multi();
+      for (const genre of genreIds) {
+        multi.zAdd(getLbKey("rating", genre), { value: isbn, score: avg });
+      }
+      multi.zAdd(getLbKey("rating", "global"), { value: isbn, score: avg });
+
+      await multi.exec();
 
       // break;
-    } catch {}
+    } catch {
+      console.log("Watch error");
+    }
     // }
 
     await redis.quit();
   }
 }
 
-export const getLbKey = (criteria: "rating" | "readers", genre: "global") =>
+export const getLbKey = (criteria: "rating" | "readers", genre: string) =>
   `leaderboard:${genre}:${criteria}`;
 
 export const leaderboardRepository = new LeaderboardRepository();
