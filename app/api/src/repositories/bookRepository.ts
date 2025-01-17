@@ -207,7 +207,7 @@ class BookRepository {
       }
 
       return { message: "Comment deleted successfully" };
-      
+
     } finally {
       await neo4j.close();
     }
@@ -261,20 +261,45 @@ class BookRepository {
   }
 
   // TODO
-  deleteRating(
+  async deleteRating(
     isbn: string,
     userId: string
   ): Promise<{ genreIds: string[]; value: number }> {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented."); 
   }
 
   // TODO
-  updateRating(
+  async updateRating(
     isbn: string,
     userId: string,
     value: number
   ): Promise<{ genreIds: string[]; oldValue: number }> {
-    throw new Error("Method not implemented.");
+    const session = getSession();
+    let result;
+
+    try{
+      result = await session.run(
+        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: %isbn})
+        WITH b, r.value AS oldValue
+        SET r.value = $value
+        RETURN ${toGenreIds("b")}, oldValue`,
+        {userId, isbn, value}
+      );
+
+    }finally{
+      await session.close();
+    }
+
+    if(result.records.length != 1){
+      throw "Coulden't update rating";
+    }
+
+    const record = result.records[0].toObject();
+    
+    return {
+      genreIds: record.genreIds,
+      oldValue: record.oldValue
+    }
   }
 
   async getRating(isbn: string, userId: string) {

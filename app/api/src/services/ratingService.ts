@@ -54,4 +54,6 @@ async function getUserRating(isbn: string, userId: string) {
 export default {
   createRating,
   getUserRating,
+  updateRating,
+  deleteRating,
 };

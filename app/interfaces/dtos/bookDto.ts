@@ -64,3 +64,12 @@ export function isValidCreateRatingDto(
   }
   return true;
 }
+
+export function isValidUpdateRatingDto(
+  dto: Partial<UpdateRatingDto>
+): dto is UpdateRatingDto {
+  if (dto.value === undefined || typeof dto.value !== "number" || dto.value <= 0) {
+    return false;
+  }
+  return true;
+}

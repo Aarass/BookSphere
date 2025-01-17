@@ -9,6 +9,7 @@ import {
   isValidCreateCommentDto,
   isValidCreateRatingDto,
   isValidSetReadingStatus,
+  isValidUpdateRatingDto
 } from "@interfaces/dtos/bookDto";
 
 let router = express.Router();
@@ -143,7 +144,7 @@ router.delete("/books/:isbn/comments", authenticate, async (req, res, next) => {
 });
 
 
-router.put("/books/:isbn/ratings", authenticate, async (req, res, next) => {
+router.post("/books/:isbn/ratings", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
   const userId = req.session.data.userId!;
 
@@ -160,6 +161,27 @@ router.put("/books/:isbn/ratings", authenticate, async (req, res, next) => {
     return next(createHttpError(500, `Something went wrong`));
   }
 });
+
+router.put("/books/:isbn/ratings", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  const body = req.body;
+  if (!isValidUpdateRatingDto(body)) {
+    return next(createHttpError(400, `Bad request`));
+  }
+
+  try {
+    await ratingService.updateRating(isbn, userId, body);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+
+
 
 router.get("/books/:isbn/ratings/my", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
