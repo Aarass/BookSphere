@@ -13,5 +13,6 @@ services:
       - NEO4J_AUTH=none
   mongo:
     image: mongo:latest
+    container_name: mongo
     ports:
       - "27017:27017"

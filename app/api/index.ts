@@ -1,23 +1,35 @@
-import express, { Request } from "express";
-import corsMiddleware from "./src/middlewares/cors";
-import sessionMiddleware from "./src/middlewares/session";
-import { authenticate } from "./src/middlewares/authenticate";
+import express from "express";
 import authController from "./src/controllers/authController";
-import bookClubController from "./src/controllers/bookClubController";
-import userController from "./src/controllers/userController";
-import bookController from "./src/controllers/bookController";
 import authorController from "./src/controllers/authorController";
+import bookClubController from "./src/controllers/bookClubController";
+import bookController from "./src/controllers/bookController";
 import genreController from "./src/controllers/genreController";
 import leaderboardController from "./src/controllers/leaderboardController";
+import userController from "./src/controllers/userController";
+import { authenticate } from "./src/middlewares/authenticate";
+import corsMiddleware from "./src/middlewares/cors";
+import sessionMiddleware from "./src/middlewares/session";
 
-import { Server } from "socket.io";
 import { createServer } from "http";
+import { Server } from "socket.io";
 import { socketListener } from "./src/controllers/messageController";
+import { connectToDatabase } from "./src/drivers/mongo";
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+async function startApplication() {
+  try {
+    await connectToDatabase();
+
+    console.log('Aplikacija je pokrenuta');
+  } catch (error) {
+    console.error('Greška pri pokretanju aplikacije:', error);
+    process.exit(1);
+  }
+}
+startApplication();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(corsMiddleware);

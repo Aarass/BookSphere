@@ -1,6 +1,6 @@
 import { Db, MongoClient } from "mongodb";
 
-const uri = "mongodb://root:rootpassword@mongo:27017";
+const uri = "mongodb://localhost:27017";
 const dbName = "my_database";
 
 let client: MongoClient;
