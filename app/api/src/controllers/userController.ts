@@ -1,7 +1,7 @@
 import express from "express";
 import createHttpError from "http-errors";
 import { authenticate } from "../middlewares/authenticate";
-import { userRecommendationService } from "../services/recommendationService";
+import { userRecommendationService } from "../services/userRecommendationService";
 import userService from "../services/userService";
 
 let router = express.Router();
@@ -17,8 +17,9 @@ router.get("/users/me", authenticate, async (req, res, next) => {
   }
 });
 
-router.post("/:userId/recommendations", authenticate, async (req, res, next) => {
-  const userId = req.params["userId"];
+router.post("/user/me/recommendations", authenticate, async (req, res, next) => {
+  let userId = req.session.data.userId!;
+
   const { description, bookIsbns } = req.body;
 
   if (!description || !Array.isArray(bookIsbns) || bookIsbns.length === 0 || bookIsbns.length > 5) {
@@ -46,8 +47,9 @@ router.get("/:userId/recommendations", async (req, res, next) => {
   }
 });
 
-router.delete("/:userId/recommendations/:listId", authenticate, async (req, res, next) => {
-  const userId = req.params["userId"];
+router.delete("/user/me/recommendations/:listId", authenticate, async (req, res, next) => {
+  let userId = req.session.data.userId!;
+
   const listId = req.params["listId"];
 
   try {

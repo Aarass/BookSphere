@@ -13,6 +13,7 @@ import sessionMiddleware from "./src/middlewares/session";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { socketListener } from "./src/controllers/messageController";
+import recommendationController from "./src/controllers/recommendationController";
 import { connectToDatabase } from "./src/drivers/mongo";
 
 const app = express();
@@ -47,6 +48,7 @@ app.use("/", bookController);
 app.use("/", authorController);
 app.use("/", genreController);
 app.use("/", leaderboardController);
+app.use("/", recommendationController);
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");
