@@ -5,6 +5,7 @@ class RecommendationService {
   async getRecommendations(userId: string): Promise<BookRaw[]> {
     const books: BookRaw[] = await recommendationRepository.getRecommendations(userId);
 
+    // TODO: Napravi da vraca celu knjigu sa autorom i zanrom
     if (books.length === 0) {
       return [];
     }

@@ -6,6 +6,7 @@ class RecommendationRepository {
     const session = getSession();
 
 
+    // TODO: Ovo je prototip mora da se izmeni malo ali i ovo prolazi
     const result = await session.executeRead(async tx => {
       return await tx.run(
         `
