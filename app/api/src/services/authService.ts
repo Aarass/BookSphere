@@ -4,6 +4,8 @@ import { LoginDto } from "@interfaces/dtos/loginDto";
 import { RegisterDto } from "@interfaces/dtos/registerDto";
 import { userRepository } from "../repositories/userRepository";
 
+// TODO ne vracati password hash
+
 async function login(data: LoginDto): Promise<User> {
   let { username, password } = data;
 
@@ -32,7 +34,7 @@ async function register(data: RegisterDto) {
       data.password,
       data.firstName,
       data.lastName,
-      data.color
+      data.color,
     );
   } catch (err) {
     console.log(err);

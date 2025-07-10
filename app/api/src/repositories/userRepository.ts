@@ -10,7 +10,7 @@ class UserRepository {
     let result = await query<User>(
       session,
       `MATCH (n: User {id: $id}) return ${toUser("n")}`,
-      { id }
+      { id },
     );
 
     await session.close();
@@ -31,7 +31,7 @@ class UserRepository {
     let result = await query<User>(
       session,
       `MATCH (n: User {username: $username}) return ${toUser("n")}`,
-      { username }
+      { username },
     );
 
     await session.close();
@@ -51,7 +51,7 @@ class UserRepository {
     password: string,
     firstName: string,
     lastName: string,
-    color: string
+    color: string,
   ): Promise<User> {
     let passhash = await bcrypt.hash(password, 10);
     let session = getSession();
@@ -66,7 +66,7 @@ class UserRepository {
         firstName,
         lastName,
         color,
-      }
+      },
     );
     await session.close();
 
