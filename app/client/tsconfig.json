@@ -1,6 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["./", "../interfaces/**/*"],
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -19,8 +17,8 @@
     "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@interfaces/*": ["../interfaces/*"]
+      "@/*": ["./src/*"],
+      "@interfaces/*": ["../../app/interfaces/*"]
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }]

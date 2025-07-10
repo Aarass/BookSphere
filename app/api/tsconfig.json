@@ -1,6 +1,5 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["./", "../interfaces/**/*"],
   "compilerOptions": {
     "target": "es6",
     "module": "ESNext",
