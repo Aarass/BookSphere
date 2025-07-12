@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,12 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateBookDto } from "@interfaces/dtos/bookDto";
 import { Genre } from "@interfaces/genre";
-import { AlertCircleIcon, ImagePlus, Terminal } from "lucide-react";
+import { AlertCircleIcon, ImagePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { AuthorAutocomplete } from "../authors/AuthorAutocomplete";
 import { GenreAutocomplete } from "../genres/GenreAutocomplete";
 import { useCreateBookMutation } from "./booksApi";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export function CreateBook() {
   // const dispatch = useAppDispatch();
@@ -49,13 +49,15 @@ export function CreateBook() {
     createBook(dto);
   }
 
+  const thereIsErrors = Object.values(errors).some(Boolean);
+
   return (
     <form
       onSubmit={handleSubmit(submit)}
       className="grid gap-4 p-4 grid-cols-[1fr_1fr]"
     >
       {(() => {
-        if (Object.values(errors).some(Boolean)) {
+        if (thereIsErrors) {
           return (
             <div className="mx-auto min-w-xs col-span-2">
               <Alert variant="destructive">
@@ -80,9 +82,9 @@ export function CreateBook() {
       })()}
 
       <Dialog>
-        <DialogTrigger asChild>
-          <div className="relative flex-1">
-            <div className="absolute right-0 h-full aspect-[10/15]">
+        <div className="relative flex-1">
+          <div className="absolute right-0 h-full aspect-[10/15]">
+            <DialogTrigger asChild>
               <button
                 type="button"
                 className="w-full h-full relative overflow-hidden rounded-md border border-input shadow-xs outline-none cursor-pointer"
@@ -104,9 +106,9 @@ export function CreateBook() {
                   }
                 })()}
               </button>
-            </div>
+            </DialogTrigger>
           </div>
-        </DialogTrigger>
+        </div>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Cover Image URL</DialogTitle>
@@ -172,7 +174,11 @@ export function CreateBook() {
             />
           </>
 
-          <Button className="mt-5" type="submit" disabled={isLoading}>
+          <Button
+            className="mt-5"
+            type="submit"
+            disabled={isLoading || thereIsErrors}
+          >
             Create
           </Button>
         </div>
