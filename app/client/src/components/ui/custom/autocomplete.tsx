@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown, ProportionsIcon } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { Control, Controller, FieldValues } from "react-hook-form";
 
@@ -23,6 +23,7 @@ export function Autocomplete<T extends { id: string }>(props: {
   entries: T[];
   entryDisplayFn: (_: T) => string;
   placeholder: string;
+  errorMessage: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -31,7 +32,7 @@ export function Autocomplete<T extends { id: string }>(props: {
       control={props.control}
       name={props.name}
       rules={{
-        required: true,
+        required: { value: true, message: props.errorMessage },
       }}
       render={({ field: { onChange, onBlur, value } }) => (
         <Popover

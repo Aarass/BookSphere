@@ -13,11 +13,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateBookDto } from "@interfaces/dtos/bookDto";
 import { Genre } from "@interfaces/genre";
-import { ImagePlus } from "lucide-react";
+import { AlertCircleIcon, ImagePlus, Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { AuthorAutocomplete } from "../authors/AuthorAutocomplete";
 import { GenreAutocomplete } from "../genres/GenreAutocomplete";
 import { useCreateBookMutation } from "./booksApi";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export function CreateBook() {
   // const dispatch = useAppDispatch();
@@ -28,7 +29,6 @@ export function CreateBook() {
     handleSubmit,
     watch,
     control,
-    clearErrors,
     formState: { errors },
   } = useForm();
 
@@ -52,8 +52,33 @@ export function CreateBook() {
   return (
     <form
       onSubmit={handleSubmit(submit)}
-      className="grid gap-4 grid-cols-[1fr_1fr]"
+      className="grid gap-4 p-4 grid-cols-[1fr_1fr]"
     >
+      {(() => {
+        if (Object.values(errors).some(Boolean)) {
+          return (
+            <div className="mx-auto min-w-xs col-span-2">
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-inside list-disc text-sm">
+                    {Object.entries(errors).map(([field, error]) => (
+                      <li key={field}>
+                        {error?.message?.toString() ??
+                          `Unknown problem with ${field}`}
+                      </li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            </div>
+          );
+        }
+
+        return null;
+      })()}
+
       <Dialog>
         <DialogTrigger asChild>
           <div className="relative flex-1">
@@ -102,64 +127,55 @@ export function CreateBook() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex flex-col gap-2 min-w-3xs">
-        <>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            {...register("title", { required: true })}
-            id="title"
-            placeholder="Title"
-          />
-          {errors["title"] && (
-            <p className="text-xs text-red-700">Tittle is required.</p>
-          )}
-        </>
+      <div>
+        <div className="flex flex-col gap-2 w-3xs">
+          <>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              {...register("title", {
+                required: { value: true, message: "Title is required" },
+              })}
+              id="title"
+              placeholder="Title"
+            />
+          </>
 
-        <>
-          <Label htmlFor="isbn">ISBN</Label>
-          <Input
-            {...register("isbn", { required: true })}
-            id="isbn"
-            placeholder="ISBN"
-          />
-          {errors["isbn"] && (
-            <p className="text-xs text-red-700">ISBN is required.</p>
-          )}
-        </>
+          <>
+            <Label htmlFor="isbn">ISBN</Label>
+            <Input
+              {...register("isbn", {
+                required: { value: true, message: "ISBN is required" },
+              })}
+              id="isbn"
+              placeholder="ISBN"
+            />
+          </>
 
-        <>
-          <Label htmlFor="author">Author</Label>
-          <AuthorAutocomplete control={control} name="author" />
-          {errors["author"] && (
-            <p className="text-xs text-red-700">Author is required.</p>
-          )}
-        </>
+          <>
+            <Label htmlFor="author">Author</Label>
+            <AuthorAutocomplete control={control} name="author" />
+          </>
 
-        <>
-          <Label htmlFor="genres">Genres</Label>
-          <GenreAutocomplete control={control} name="genres" />
-          {errors["genres"] && (
-            <p className="text-xs text-red-700">
-              You must specify at least one genre
-            </p>
-          )}
-        </>
+          <>
+            <Label htmlFor="genres">Genres</Label>
+            <GenreAutocomplete control={control} name="genres" />
+          </>
 
-        <>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            {...register("description", { required: true })}
-            id="description"
-            placeholder="Description"
-          />
-          {errors["description"] && (
-            <p className="text-xs text-red-700">Description is required.</p>
-          )}
-        </>
+          <>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              {...register("description", {
+                required: { value: true, message: "Description is required" },
+              })}
+              id="description"
+              placeholder="Description"
+            />
+          </>
 
-        <Button className="mt-5" type="submit" disabled={isLoading}>
-          Create
-        </Button>
+          <Button className="mt-5" type="submit" disabled={isLoading}>
+            Create
+          </Button>
+        </div>
       </div>
     </form>
   );

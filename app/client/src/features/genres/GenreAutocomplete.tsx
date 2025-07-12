@@ -41,7 +41,10 @@ export function GenreAutocomplete(props: {
       defaultValue={[] as Genre[]}
       name={props.name}
       rules={{
-        required: true,
+        required: {
+          value: true,
+          message: "At least one genre must be selected",
+        },
       }}
       render={({ field: { onChange, onBlur, value } }) => (
         <Popover
