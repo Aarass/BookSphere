@@ -9,7 +9,7 @@ import {
   isValidCreateCommentDto,
   isValidCreateRatingDto,
   isValidSetReadingStatus,
-  isValidUpdateRatingDto
+  isValidUpdateRatingDto,
 } from "@interfaces/dtos/bookDto";
 
 let router = express.Router();
@@ -92,7 +92,7 @@ router.put(
       console.error(err);
       return next(createHttpError(500, `Something went wrong`));
     }
-  }
+  },
 );
 
 router.post("/books/:isbn/comments", authenticate, async (req, res, next) => {
@@ -143,7 +143,6 @@ router.delete("/books/:isbn/comments", authenticate, async (req, res, next) => {
   }
 });
 
-
 router.post("/books/:isbn/ratings", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
   const userId = req.session.data.userId!;
@@ -192,8 +191,6 @@ router.delete("/books/:isbn/ratings", authenticate, async (req, res, next) => {
     return next(createHttpError(500, `Something went wrong`));
   }
 });
-
-
 
 router.get("/books/:isbn/ratings/my", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
