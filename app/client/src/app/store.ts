@@ -1,20 +1,24 @@
+import { backend } from "@/constants";
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { authSlice } from "../features/auth/authSlice";
-import { genresApi } from "@/features/genres/genresApi";
-import { authorsApi } from "@/features/authors/authorsApi";
 
-const rootReducer = combineSlices(authSlice, genresApi, authorsApi);
+export const api = createApi({
+  baseQuery: fetchBaseQuery({ baseUrl: backend, credentials: "include" }),
+  endpoints: () => ({}),
+  tagTypes: ["Book", "BookStats", "BookComment", "BookReadingStatus"],
+});
+
+const rootReducer = combineSlices(authSlice, api);
 export type RootState = ReturnType<typeof rootReducer>;
 
 export const makeStore = (preloadedState?: Partial<RootState>) => {
   const store = configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) => {
-      return getDefaultMiddleware()
-        .concat(genresApi.middleware)
-        .concat(authorsApi.middleware);
+      return getDefaultMiddleware().concat(api.middleware);
     },
     preloadedState,
   });

@@ -10,6 +10,7 @@ import { Login } from "./features/auth/login/LoginComponent";
 import { HomePage } from "./pages/HomePage";
 import { tryRestoreSession } from "./features/auth/authSlice";
 import { CreateBook } from "./features/books/CreateBook";
+import { BookList } from "./features/books/BookList";
 
 store.dispatch(tryRestoreSession());
 
@@ -24,15 +25,22 @@ if (container) {
         <BrowserRouter>
           <Routes>
             <Route path="/">
-              {/* <Route index element={<p>landpage</p>} /> */}
-              <Route
-                index
-                element={
-                  <div className="flex min-h-svh items-center justify-center">
-                    <CreateBook />
-                  </div>
-                }
-              />
+              <Route index element={<p>landpage</p>} />
+              {
+                // <Route
+                //   index
+                //   element={
+                //     <div className="flex min-h-svh items-center justify-center">
+                //       <CreateBook />
+                //     </div>
+                //   }
+                // />
+              }
+
+              <Route path="books">
+                <Route index element={<BookList />} />
+                <Route path="create" element={<CreateBook />} />
+              </Route>
 
               <Route element={<MustBeLoggedInGuard />}>
                 <Route path="home" element={<HomePage />} />

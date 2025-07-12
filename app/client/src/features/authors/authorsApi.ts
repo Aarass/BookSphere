@@ -1,10 +1,7 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { backend } from "@/constants";
+import { api } from "@/app/store";
 import { Author } from "@interfaces/author";
 
-export const authorsApi = createApi({
-  reducerPath: "authors",
-  baseQuery: fetchBaseQuery({ baseUrl: backend }),
+export const apiWithAuthors = api.injectEndpoints({
   endpoints: (builder) => ({
     getAuthors: builder.query<Author[], void>({
       query: () => `/authors`,
@@ -12,4 +9,4 @@ export const authorsApi = createApi({
   }),
 });
 
-export const { useGetAuthorsQuery } = authorsApi;
+export const { useGetAuthorsQuery } = apiWithAuthors;

@@ -1,10 +1,7 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { backend } from "@/constants";
+import { api } from "@/app/store";
 import { Genre } from "@interfaces/genre";
 
-export const genresApi = createApi({
-  reducerPath: "genres",
-  baseQuery: fetchBaseQuery({ baseUrl: backend }),
+export const apiWithGenres = api.injectEndpoints({
   endpoints: (builder) => ({
     getGenres: builder.query<Genre[], void>({
       query: () => `/genres`,
@@ -12,4 +9,4 @@ export const genresApi = createApi({
   }),
 });
 
-export const { useGetGenresQuery } = genresApi;
+export const { useGetGenresQuery } = apiWithGenres;

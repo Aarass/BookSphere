@@ -17,8 +17,12 @@ import { ImagePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { AuthorAutocomplete } from "../authors/AuthorAutocomplete";
 import { GenreAutocomplete } from "../genres/GenreAutocomplete";
+import { useCreateBookMutation } from "./booksApi";
 
 export function CreateBook() {
+  // const dispatch = useAppDispatch();
+  // const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -28,8 +32,7 @@ export function CreateBook() {
     formState: { errors },
   } = useForm();
 
-  // const dispatch = useAppDispatch();
-  // const navigate = useNavigate();
+  const [createBook, { isLoading }] = useCreateBookMutation();
 
   const linkValue = watch("link");
 
@@ -43,7 +46,7 @@ export function CreateBook() {
       genreIds: formData.genres.map((g: Genre) => g.id),
     };
 
-    console.log(dto);
+    createBook(dto);
   }
 
   return (
@@ -154,7 +157,7 @@ export function CreateBook() {
           )}
         </>
 
-        <Button className="mt-5" type="submit">
+        <Button className="mt-5" type="submit" disabled={isLoading}>
           Create
         </Button>
       </div>
