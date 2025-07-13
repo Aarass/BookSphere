@@ -9,10 +9,11 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: backend, credentials: "include" }),
   endpoints: () => ({}),
   tagTypes: [
+    "User",
     "Book",
     "BookStats",
     "MyBookRating",
-    "BookComment",
+    "BookComments",
     "BookReadingStatus",
   ],
 });

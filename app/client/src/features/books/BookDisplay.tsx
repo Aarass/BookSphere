@@ -2,6 +2,7 @@ import { Book } from "@interfaces/book";
 import { BookStats } from "./BookStats";
 import { RateBook } from "./rating/RateBook";
 import { MyReadingStatus } from "./MyReadingStatus";
+import { CommentsList } from "./comments/CommentsList";
 
 export function BookDisplay({ book }: { book: Book }) {
   return (
@@ -23,6 +24,8 @@ export function BookDisplay({ book }: { book: Book }) {
         <RateBook isbn={book.isbn} />
         <MyReadingStatus isbn={book.isbn} />
       </div>
+
+      <CommentsList isbn={book.isbn} />
     </div>
   );
 }

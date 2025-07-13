@@ -2,6 +2,8 @@ import { Book, BookWithScore, ReadingStatus } from "@interfaces/book";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
 import { CreateCommentDto } from "@interfaces/dtos/bookDto";
+import { Comment } from "@interfaces/comment";
+
 class BookRepository {
   async createBook(
     isbn: string,
@@ -443,7 +445,7 @@ function toComment(
 ) {
   return `
     ${bookVar}.isbn as bookISBN,
-    ${userVar}.id as userId,
+    ${userVar}.id as authorId,
     ${commentRelationVar}.comment as content,
     ${commentRelationVar}.timestamp as timestamp
   `;
