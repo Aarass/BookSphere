@@ -83,7 +83,7 @@ export function CreateBook() {
 
       <Dialog>
         <div className="relative flex-1">
-          <div className="absolute right-0 h-full aspect-[10/15]">
+          <div className="absolute right-0 h-full aspect-(--cover)">
             <DialogTrigger asChild>
               <button
                 type="button"

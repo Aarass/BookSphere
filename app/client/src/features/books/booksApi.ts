@@ -42,11 +42,6 @@ export const apiWithBooks = api.injectEndpoints({
     // -----------------------------------------------------------------------
     // TODO dodati edit i na frontu i na beku
     // -----------------------------------------------------------------------
-    // TODO ovog nema na beku
-    // getBookReadingStatus: builder.query<number[] /*TODO */, Book["isbn"]>({
-    //   query: (isbn) => `/books/${isbn}/reading-status`,
-    // }),
-    // -----------------------------------------------------------------------
     setBookReadingStatus: builder.mutation<
       void,
       { isbn: Book["isbn"]; dto: SetReadingStatus }
@@ -60,6 +55,11 @@ export const apiWithBooks = api.injectEndpoints({
         return [{ type: "BookReadingStatus", id: isbn }];
       },
     }),
+    // TODO ovog nema na beku - dodati
+    // getBookReadingStatus: builder.query<number[] /*TODO */, Book["isbn"]>({
+    //   query: (isbn) => `/books/${isbn}/reading-status`,
+    // }),
+    // -----------------------------------------------------------------------
     getBookStats: builder.query<number[] /*TODO */, Book["isbn"]>({
       query: (isbn) => `/books/${isbn}/stats`,
       providesTags: (_result, _error, isbn) => {
@@ -78,5 +78,10 @@ export const apiWithBooks = api.injectEndpoints({
   }),
 });
 
-export const { useGetBooksQuery, useGetBookQuery, useCreateBookMutation } =
-  apiWithBooks;
+export const {
+  useGetBooksQuery,
+  useGetBookQuery,
+  useCreateBookMutation,
+  useDeleteBookMutation,
+  useGetBookStatsQuery,
+} = apiWithBooks;

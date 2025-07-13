@@ -11,6 +11,7 @@ import { HomePage } from "./pages/HomePage";
 import { tryRestoreSession } from "./features/auth/authSlice";
 import { CreateBook } from "./features/books/CreateBook";
 import { BookList } from "./features/books/BookList";
+import { Book } from "./features/books/Book.tsx";
 
 store.dispatch(tryRestoreSession());
 
@@ -39,6 +40,7 @@ if (container) {
 
               <Route path="books">
                 <Route index element={<BookList />} />
+                <Route path=":isbn" element={<Book />} />
                 <Route path="create" element={<CreateBook />} />
               </Route>
 
