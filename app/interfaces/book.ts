@@ -23,3 +23,7 @@ export interface BookStats {
   commentsCoutn: number;
   currentlyReadingCount: number;
 }
+
+export interface ReadingStatus {
+  status: boolean;
+}

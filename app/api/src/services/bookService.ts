@@ -1,6 +1,7 @@
 import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
 import { statsRepository } from "../repositories/statsRepository";
+import { ReadingStatus } from "@interfaces/book";
 
 async function createBook(dto: CreateBookDto) {
   const book = await bookRepository.createBook(
@@ -9,7 +10,7 @@ async function createBook(dto: CreateBookDto) {
     dto.description,
     dto.imageUrl,
     dto.authorId,
-    dto.genreIds
+    dto.genreIds,
   );
 
   return book;
@@ -33,15 +34,22 @@ async function deleteBook(isbn: string) {
   return deletedBook;
 }
 
+async function getReadingStatus(
+  isbn: string,
+  userId: string,
+): Promise<ReadingStatus> {
+  return await bookRepository.getReadingStatus(isbn, userId);
+}
+
 async function setReadingStatus(
   isbn: string,
   userId: string,
-  dto: SetReadingStatus
+  dto: SetReadingStatus,
 ) {
   const { hasChanged } = await bookRepository.setReadingStatus(
     isbn,
     userId,
-    dto.status
+    dto.status,
   );
 
   if (hasChanged) {
@@ -60,6 +68,7 @@ export default {
   getBookByISBN,
   getAllBooks,
   deleteBook,
+  getReadingStatus,
   setReadingStatus,
   getStats,
 };

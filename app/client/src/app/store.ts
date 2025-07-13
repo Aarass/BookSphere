@@ -8,7 +8,13 @@ import { authSlice } from "../features/auth/authSlice";
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: backend, credentials: "include" }),
   endpoints: () => ({}),
-  tagTypes: ["Book", "BookStats", "BookComment", "BookReadingStatus"],
+  tagTypes: [
+    "Book",
+    "BookStats",
+    "MyBookRating",
+    "BookComment",
+    "BookReadingStatus",
+  ],
 });
 
 const rootReducer = combineSlices(authSlice, api);

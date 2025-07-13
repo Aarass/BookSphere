@@ -1,5 +1,7 @@
 import { Book } from "@interfaces/book";
 import { BookStats } from "./BookStats";
+import { RateBook } from "./rating/RateBook";
+import { MyReadingStatus } from "./MyReadingStatus";
 
 export function BookDisplay({ book }: { book: Book }) {
   return (
@@ -17,6 +19,10 @@ export function BookDisplay({ book }: { book: Book }) {
       <p>{book.description}</p>
 
       <BookStats isbn={book.isbn} />
+      <div className="flex items-center">
+        <RateBook isbn={book.isbn} />
+        <MyReadingStatus isbn={book.isbn} />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Book, BookWithScore } from "@interfaces/book";
+import { Book, BookWithScore, ReadingStatus } from "@interfaces/book";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
 import { CreateCommentDto } from "@interfaces/dtos/bookDto";
@@ -9,7 +9,7 @@ class BookRepository {
     description: string,
     imageUrl: string,
     authorId: string,
-    genreIds: string[]
+    genreIds: string[],
   ) {
     const session = getSession();
     let newBook;
@@ -35,7 +35,7 @@ class BookRepository {
             imageUrl,
             authorId,
             genreIds,
-          }
+          },
         );
 
         const updates = result.summary.counters.updates();
@@ -75,7 +75,7 @@ class BookRepository {
       result = await query<Book>(
         session,
         `MATCH (a:Author)-[:WROTE]->(b:Book {isbn: $isbn}) return ${toBook("b", "a")}`,
-        { isbn }
+        { isbn },
       );
     } finally {
       await session.close();
@@ -95,7 +95,7 @@ class BookRepository {
       const result = await query<Book>(
         session,
         `MATCH (a:Author)-[:WROTE]->(b:Book) RETURN ${toBook("b", "a")}`,
-        {}
+        {},
       );
 
       return result;
@@ -121,7 +121,7 @@ class BookRepository {
         RETURN book`,
         {
           isbn,
-        }
+        },
       );
 
       if (result.records.length != 1) {
@@ -129,6 +129,31 @@ class BookRepository {
       }
 
       return result.records[0].toObject().book as Book;
+    } finally {
+      await session.close();
+    }
+  }
+
+  async getReadingStatus(isbn: string, userId: string): Promise<ReadingStatus> {
+    const session = getSession();
+
+    try {
+      const result = await query(
+        session,
+        `RETURN EXISTS {MATCH (u:User {id: $userId})-[r:IS_READING]->(b:Book {isbn: $isbn})} AS isReading`,
+        {
+          userId,
+          isbn,
+        },
+      );
+
+      if (result.length !== 1) {
+        throw "Internal error";
+      }
+
+      return {
+        status: result[0]["isReading"],
+      } satisfies ReadingStatus;
     } finally {
       await session.close();
     }
@@ -144,7 +169,7 @@ class BookRepository {
             ? `CREATE (u)-[:IS_READING {_start: $userId, _end: $isbn}]->(b)`
             : `MATCH (u)-[r:IS_READING]->(b) DELETE r`
         }`,
-        { isbn, userId }
+        { isbn, userId },
       );
 
       const updates = result.summary.counters.updates();
@@ -172,7 +197,7 @@ class BookRepository {
           userId,
           isbn,
           content,
-        }
+        },
       );
     } finally {
       await neo4j.close();
@@ -198,20 +223,18 @@ class BookRepository {
           userId,
           isbn,
           content: dto.content,
-        }
-      )
-      
+        },
+      );
+
       const updates = result.summary.counters.updates();
       if (updates.relationshipsDeleted != 1) {
         throw "Couldn't delete commennt";
       }
 
       return { message: "Comment deleted successfully" };
-
     } finally {
       await neo4j.close();
     }
-
   }
 
   async getComments(isbn: string) {
@@ -221,7 +244,7 @@ class BookRepository {
         session,
         `MATCH (u:User)-[r:HAS_COMMENTED]->(b:Book {isbn: $isbn})
         RETURN ${toComment("r", "u", "b")}`,
-        { isbn }
+        { isbn },
       );
 
       return result;
@@ -242,7 +265,7 @@ class BookRepository {
           userId,
           isbn,
           value,
-        }
+        },
       );
     } finally {
       await session.close();
@@ -263,68 +286,66 @@ class BookRepository {
   // TODO
   async deleteRating(
     isbn: string,
-    userId: string
+    userId: string,
   ): Promise<{ genreIds: string[]; value: number }> {
     const session = getSession();
     let result;
 
-    try{
+    try {
       result = await session.run(
-        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: %isbn})
-        WITH b, r.value AS value
+        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: $isbn})
+        WITH b, r, r.value AS value
         DELETE r
         RETURN ${toGenreIds("b")}, value`,
-        {userId, isbn}
+        { userId, isbn },
       );
-
-    }finally{
+    } finally {
       await session.close();
     }
 
-    if(result.records.length != 1){
+    if (result.records.length != 1) {
       throw "Coulden't delete rating";
     }
 
     const record = result.records[0].toObject();
-    
+
     return {
       genreIds: record.genreIds,
-      value: record.value
-    }
+      value: record.value,
+    };
   }
 
   // TODO
   async updateRating(
     isbn: string,
     userId: string,
-    value: number
+    value: number,
   ): Promise<{ genreIds: string[]; oldValue: number }> {
     const session = getSession();
     let result;
 
-    try{
+    try {
       result = await session.run(
-        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: %isbn})
-        WITH b, r.value AS oldValue
+        `MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book {isbn: $isbn})
+        WITH b, r,  r.value AS oldValue
         SET r.value = $value
         RETURN ${toGenreIds("b")}, oldValue`,
-        {userId, isbn, value}
+        { userId, isbn, value },
       );
-
-    }finally{
+    } finally {
       await session.close();
     }
 
-    if(result.records.length != 1){
+    if (result.records.length != 1) {
       throw "Coulden't update rating";
     }
 
     const record = result.records[0].toObject();
-    
+
     return {
       genreIds: record.genreIds,
-      oldValue: record.oldValue
-    }
+      oldValue: record.oldValue,
+    };
   }
 
   async getRating(isbn: string, userId: string) {
@@ -338,7 +359,7 @@ class BookRepository {
         {
           userId,
           isbn,
-        }
+        },
       );
 
       if (result.length > 1) {
@@ -356,7 +377,7 @@ class BookRepository {
   }
 
   async mapToBooksWithScore(
-    scoresAndISBNs: { score: number; value: string }[]
+    scoresAndISBNs: { score: number; value: string }[],
   ) {
     const session = getSession();
     try {
@@ -366,7 +387,7 @@ class BookRepository {
         WITH scoreAndISBN.value as isbn, scoreAndISBN.score as score
         MATCH (a:Author)-[:WROTE]->(b:Book {isbn: isbn})
         RETURN ${toBook("b", "a")}, score`,
-        { scoresAndISBNs }
+        { scoresAndISBNs },
       );
 
       return result;
@@ -383,7 +404,7 @@ class BookRepository {
       MATCH (b:Book)-[:BELONGS_TO]->(:Genre {name: $genre})
       RETURN b.isbn AS isbn
       `,
-        { genre }
+        { genre },
       );
 
       return result.records.map((record: any) => record.get("isbn"));
@@ -418,7 +439,7 @@ function toRawBook(bookVar: string) {
 function toComment(
   commentRelationVar: string,
   userVar: string,
-  bookVar: string
+  bookVar: string,
 ) {
   return `
     ${bookVar}.isbn as bookISBN,
@@ -432,7 +453,7 @@ function toRating(ratingRelationVar: string, userVar: string, bookVar: string) {
   return `
     ${bookVar}.isbn as bookISBN,
     ${userVar}.id as userId,
-    ${ratingRelationVar}.value as rating
+    ${ratingRelationVar}.value as value
   `;
 }
 
@@ -451,7 +472,7 @@ async function tests() {
     await bookRepository.setReadingStatus(
       "0-7567-5189-6",
       "43eb72c0-c592-49ed-9def-00f28a076159",
-      true
+      true,
     );
   }
 
@@ -459,7 +480,7 @@ async function tests() {
     await bookRepository.setReadingStatus(
       "0-7567-5189-6",
       "43eb72c0-c592-49ed-9def-00f28a076159",
-      false
+      false,
     );
   }
 
@@ -467,7 +488,7 @@ async function tests() {
     let tmp = await bookRepository.createComment(
       "0-7567-5189-6",
       "43eb72c0-c592-49ed-9def-00f28a076159",
-      "U sto knjiga.."
+      "U sto knjiga..",
     );
     console.log(tmp);
   }
@@ -481,14 +502,14 @@ async function tests() {
     await bookRepository.createRating(
       "0-7567-5189-6",
       "43eb72c0-c592-49ed-9def-00f28a076159",
-      3
+      3,
     );
   }
 
   if (false) {
     let tmp = await bookRepository.getRating(
       "0-7567-5189-6",
-      "43eb72c0-c592-49ed-9def-00f28a076159"
+      "43eb72c0-c592-49ed-9def-00f28a076159",
     );
     console.log(tmp);
   }

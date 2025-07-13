@@ -1,8 +1,6 @@
 import { api } from "@/app/store";
-import { Book } from "@interfaces/book";
-import { Comment } from "@interfaces/comment";
+import { Book, ReadingStatus } from "@interfaces/book";
 import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
-import { UNSAFE_ErrorResponseImpl } from "react-router";
 
 export const apiWithBooks = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -42,6 +40,19 @@ export const apiWithBooks = api.injectEndpoints({
     // -----------------------------------------------------------------------
     // TODO dodati edit i na frontu i na beku
     // -----------------------------------------------------------------------
+    getBookStats: builder.query<number[] /*TODO */, Book["isbn"]>({
+      query: (isbn) => `/books/${isbn}/stats`,
+      providesTags: (_result, _error, isbn) => {
+        return [{ type: "BookStats", id: isbn }];
+      },
+    }),
+    getBookReadingStatus: builder.query<ReadingStatus, Book["isbn"]>({
+      query: (isbn) => `/books/${isbn}/reading-status`,
+
+      providesTags: (_result, _error, isbn) => {
+        return [{ type: "BookReadingStatus", id: isbn }];
+      },
+    }),
     setBookReadingStatus: builder.mutation<
       void,
       { isbn: Book["isbn"]; dto: SetReadingStatus }
@@ -52,18 +63,10 @@ export const apiWithBooks = api.injectEndpoints({
         body: dto,
       }),
       invalidatesTags: (_result, _error, { isbn }) => {
-        return [{ type: "BookReadingStatus", id: isbn }];
-      },
-    }),
-    // TODO ovog nema na beku - dodati
-    // getBookReadingStatus: builder.query<number[] /*TODO */, Book["isbn"]>({
-    //   query: (isbn) => `/books/${isbn}/reading-status`,
-    // }),
-    // -----------------------------------------------------------------------
-    getBookStats: builder.query<number[] /*TODO */, Book["isbn"]>({
-      query: (isbn) => `/books/${isbn}/stats`,
-      providesTags: (_result, _error, isbn) => {
-        return [{ type: "BookStats", id: isbn }];
+        return [
+          { type: "BookReadingStatus", id: isbn },
+          { type: "BookStats", id: isbn },
+        ];
       },
     }),
     // getBookComments: builder.query<Comment[], Book["isbn"]>({
@@ -84,4 +87,6 @@ export const {
   useCreateBookMutation,
   useDeleteBookMutation,
   useGetBookStatsQuery,
+  useGetBookReadingStatusQuery,
+  useSetBookReadingStatusMutation,
 } = apiWithBooks;

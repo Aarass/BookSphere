@@ -1,6 +1,11 @@
 import { Book } from "@interfaces/book";
-import { BookOpen, MessageCircleHeart, Star } from "lucide-react";
+import { BookOpen, MessageCircleHeart, Star, Users } from "lucide-react";
 import { useGetBookStatsQuery } from "./booksApi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function BookStats({ isbn }: { isbn: Book["isbn"] }) {
   const {
@@ -9,8 +14,6 @@ export function BookStats({ isbn }: { isbn: Book["isbn"] }) {
     error,
     isUninitialized,
   } = useGetBookStatsQuery(isbn);
-
-  console.log(stats);
 
   if (isUninitialized) {
     throw new Error(`This should be impossible`);
@@ -32,14 +35,39 @@ export function BookStats({ isbn }: { isbn: Book["isbn"] }) {
   const rating = (ratingsSum / ratingsCount).toFixed(2);
 
   return (
-    <div className="flex gap-2">
-      <Star />
-      <span>{rating}</span>
-      <span>({ratingsCount})</span>
-      <MessageCircleHeart />
-      <span>{commentsCount}</span>
-      <BookOpen />
-      <span>{readersCount}</span>
+    <div className="flex gap-4">
+      <Tooltip>
+        <TooltipTrigger className="flex items-center">
+          <Star />
+          <span>{rating}</span>
+          <div className="flex items-center opacity-50 ml-1">
+            ({ratingsCount} {<Users className="inline" size={15} />})
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Average rating</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger className="flex items-center">
+          <MessageCircleHeart />
+          <span>{commentsCount}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Number of reviews</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger className="flex items-center">
+          <BookOpen />
+          <span>{readersCount}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Number of people currently reading this book</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }

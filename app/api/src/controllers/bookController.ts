@@ -1,9 +1,3 @@
-import express from "express";
-import bookService from "../services/bookService";
-import ratingService from "../services/ratingService";
-import commentService from "../services/commentService";
-import createHttpError from "http-errors";
-import { authenticate } from "../middlewares/authenticate";
 import {
   isValidCreateBookDto,
   isValidCreateCommentDto,
@@ -11,6 +5,12 @@ import {
   isValidSetReadingStatus,
   isValidUpdateRatingDto,
 } from "@interfaces/dtos/bookDto";
+import express from "express";
+import createHttpError from "http-errors";
+import { authenticate } from "../middlewares/authenticate";
+import bookService from "../services/bookService";
+import commentService from "../services/commentService";
+import ratingService from "../services/ratingService";
 
 let router = express.Router();
 
@@ -72,6 +72,23 @@ router.delete("/books/:isbn", async (req, res, next) => {
     return next(createHttpError(500, `Something went wrong`));
   }
 });
+
+router.get(
+  "/books/:isbn/reading-status",
+  authenticate,
+  async (req, res, next) => {
+    const isbn = req.params["isbn"];
+    const userId = req.session.data.userId!;
+
+    try {
+      const status = await bookService.getReadingStatus(isbn, userId);
+      res.status(200).send(status);
+    } catch (err) {
+      console.error(err);
+      return next(createHttpError(500, `Something went wrong`));
+    }
+  },
+);
 
 router.put(
   "/books/:isbn/reading-status",
