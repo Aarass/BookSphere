@@ -16,6 +16,8 @@ import { MustBeLoggedInGuard } from "./routing/Guard";
 import { AllBookClubs } from "./features/clubs/AllBookClubs";
 import { JoinedBookClubs } from "./features/clubs/JoinedBookClubs";
 import { BookClubPage } from "./pages/BookClubPage";
+import { ThemeProvider } from "./components/ui/theme-provider";
+import { ModeToggle } from "./components/ui/custom/themeToggle";
 
 store.dispatch(tryRestoreSession());
 
@@ -26,43 +28,46 @@ if (container) {
 
   root.render(
     <React.StrictMode>
-      <div className="min-h-svh flex flex-col">
-        <Provider store={store}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/">
-                <Route index element={<p>landpage</p>} />
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <div className="min-h-svh flex flex-col">
+          <ModeToggle />
+          <Provider store={store}>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/">
+                  <Route index element={<p>landpage</p>} />
 
-                <Route element={<MustBeLoggedInGuard />}>
-                  <Route path="books">
-                    <Route index element={<BookList />} />
-                    <Route path=":isbn" element={<Book />} />
-                    <Route path="create" element={<CreateBook />} />
+                  <Route element={<MustBeLoggedInGuard />}>
+                    <Route path="books">
+                      <Route index element={<BookList />} />
+                      <Route path=":isbn" element={<Book />} />
+                      <Route path="create" element={<CreateBook />} />
+                    </Route>
+
+                    <Route path="clubs">
+                      <Route index element={<AllBookClubs />} />
+                      <Route path="joined" element={<JoinedBookClubs />} />
+                      <Route path=":id" element={<BookClubPage />} />
+                    </Route>
+
+                    <Route path="home" element={<HomePage />} />
+                    <Route path="profile" element={<p>profile</p>} />
                   </Route>
 
-                  <Route path="clubs">
-                    <Route index element={<AllBookClubs />} />
-                    <Route path="joined" element={<JoinedBookClubs />} />
-                    <Route path=":id" element={<BookClubPage />} />
+                  <Route path="auth">
+                    <Route element={<AuthPage />}>
+                      <Route path="login" element={<Login />} />
+                      <Route path="register" element={<p>register</p>} />
+                    </Route>
                   </Route>
-
-                  <Route path="home" element={<HomePage />} />
-                  <Route path="profile" element={<p>profile</p>} />
                 </Route>
+              </Routes>
+            </BrowserRouter>
 
-                <Route path="auth">
-                  <Route element={<AuthPage />}>
-                    <Route path="login" element={<Login />} />
-                    <Route path="register" element={<p>register</p>} />
-                  </Route>
-                </Route>
-              </Route>
-            </Routes>
-          </BrowserRouter>
-
-          <Toaster />
-        </Provider>
-      </div>
+            <Toaster />
+          </Provider>
+        </div>
+      </ThemeProvider>
     </React.StrictMode>,
   );
 } else {
