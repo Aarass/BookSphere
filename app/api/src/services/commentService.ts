@@ -1,11 +1,11 @@
-import { CreateCommentDto } from "@interfaces/dtos/bookDto";
+import { CreateCommentDto, UpdateCommentDto } from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
 import { statsRepository } from "../repositories/statsRepository";
 
 async function createComment(
   isbn: string,
   userId: string,
-  dto: CreateCommentDto
+  dto: CreateCommentDto,
 ) {
   const comment = await bookRepository.createComment(isbn, userId, dto.content);
 
@@ -16,13 +16,16 @@ async function createComment(
   return comment;
 }
 
-
-async function deleteComment(
+async function updateComment(
   isbn: string,
   userId: string,
-  dto: CreateCommentDto
+  dto: UpdateCommentDto,
 ) {
-  const result = await bookRepository.deleteComment(isbn, userId, dto);
+  return await bookRepository.updateComment(isbn, userId, dto.content);
+}
+
+async function deleteComment(isbn: string, userId: string) {
+  const result = await bookRepository.deleteComment(isbn, userId);
 
   setImmediate(async () => {
     try {
@@ -39,8 +42,14 @@ async function getComments(isbn: string) {
   return await bookRepository.getComments(isbn);
 }
 
+async function getComment(userId: string, isbn: string) {
+  return await bookRepository.getComment(userId, isbn);
+}
+
 export default {
-  createComment,
   getComments,
+  getComment,
+  createComment,
+  updateComment,
   deleteComment,
 };

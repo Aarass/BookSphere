@@ -1,7 +1,6 @@
 import { Book, BookWithScore, ReadingStatus } from "@interfaces/book";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
-import { CreateCommentDto } from "@interfaces/dtos/bookDto";
 import { Comment } from "@interfaces/comment";
 
 class BookRepository {
@@ -212,23 +211,52 @@ class BookRepository {
     return result[0];
   }
 
-  async deleteComment(isbn: string, userId: string, dto: CreateCommentDto) {
+  async updateComment(isbn: string, userId: string, newContent: string) {
+    const session = getSession();
+    let result;
+
+    try {
+      result = await session.run(
+        `MATCH (:User {id: $userId})-[r:HAS_COMMENTED]->(:Book {isbn: $isbn})
+         SET r.comment = $content, r.timestamp = $timestamp`,
+        {
+          userId,
+          isbn,
+          timestamp: Date.now(),
+          content: newContent,
+        },
+      );
+    } finally {
+      await session.close();
+    }
+
+    console.log(result.summary);
+
+    const updates = result.summary.counters.updates();
+
+    if (updates.propertiesSet !== 2) {
+      console.error(
+        `Error updating comment. Expected 2# properties set. Instead set ${updates.propertiesSet}# properties`,
+      );
+      throw "Couldn't update comment";
+    }
+  }
+
+  async deleteComment(isbn: string, userId: string) {
     const neo4j = getSession();
 
     let result;
     try {
       result = await neo4j.run(
-        `MATCH (u:User {id: $userId})-[r:HAS_COMMENTED {comment: $content}]->(b:Book {isbn: $isbn})
-        DELETE r
-        RETURN u, b`,
+        `MATCH (:User {id: $userId})-[r:HAS_COMMENTED]->(:Book {isbn: $isbn}) DELETE r`,
         {
           userId,
           isbn,
-          content: dto.content,
         },
       );
 
       const updates = result.summary.counters.updates();
+
       if (updates.relationshipsDeleted != 1) {
         throw "Couldn't delete commennt";
       }
@@ -250,6 +278,30 @@ class BookRepository {
       );
 
       return result;
+    } finally {
+      await session.close();
+    }
+  }
+
+  async getComment(userId: string, isbn: string): Promise<Comment | null> {
+    const session = getSession();
+    try {
+      const result = await query<Comment>(
+        session,
+        `MATCH (u:User {id: $userId})-[r:HAS_COMMENTED]->(b:Book {isbn: $isbn})
+        RETURN ${toComment("r", "u", "b")}`,
+        { userId, isbn },
+      );
+
+      if (result.length > 1) {
+        throw "Internal error";
+      }
+
+      if (result.length === 0) {
+        return null;
+      }
+
+      return result[0];
     } finally {
       await session.close();
     }
@@ -285,7 +337,6 @@ class BookRepository {
     return result.records[0].toObject() as { ids: string[] };
   }
 
-  // TODO
   async deleteRating(
     isbn: string,
     userId: string,
@@ -306,7 +357,7 @@ class BookRepository {
     }
 
     if (result.records.length != 1) {
-      throw "Coulden't delete rating";
+      throw "Couldn't delete rating";
     }
 
     const record = result.records[0].toObject();

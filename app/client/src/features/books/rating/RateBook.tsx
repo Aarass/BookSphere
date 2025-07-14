@@ -65,6 +65,7 @@ export function RateBook(props: { isbn: Book["isbn"] }) {
 
     stars.push(
       <Star
+        size={18}
         className="cursor-pointer"
         key={i}
         fill={undefined}

@@ -11,7 +11,8 @@ import { HomePage } from "./pages/HomePage";
 import { tryRestoreSession } from "./features/auth/authSlice";
 import { CreateBook } from "./features/books/CreateBook";
 import { BookList } from "./features/books/BookList";
-import { Book } from "./features/books/Book.tsx";
+import { Toaster } from "@/components/ui/sonner";
+import { Book } from "./features/books/Book";
 
 store.dispatch(tryRestoreSession());
 
@@ -27,24 +28,14 @@ if (container) {
           <Routes>
             <Route path="/">
               <Route index element={<p>landpage</p>} />
-              {
-                // <Route
-                //   index
-                //   element={
-                //     <div className="flex min-h-svh items-center justify-center">
-                //       <CreateBook />
-                //     </div>
-                //   }
-                // />
-              }
-
-              <Route path="books">
-                <Route index element={<BookList />} />
-                <Route path=":isbn" element={<Book />} />
-                <Route path="create" element={<CreateBook />} />
-              </Route>
 
               <Route element={<MustBeLoggedInGuard />}>
+                <Route path="books">
+                  <Route index element={<BookList />} />
+                  <Route path=":isbn" element={<Book />} />
+                  <Route path="create" element={<CreateBook />} />
+                </Route>
+
                 <Route path="home" element={<HomePage />} />
                 <Route path="profile" element={<p>profile</p>} />
               </Route>
@@ -58,6 +49,8 @@ if (container) {
             </Route>
           </Routes>
         </BrowserRouter>
+
+        <Toaster />
       </Provider>
     </React.StrictMode>,
   );

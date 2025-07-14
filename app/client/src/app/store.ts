@@ -13,7 +13,7 @@ export const api = createApi({
     "Book",
     "BookStats",
     "MyBookRating",
-    "BookComments",
+    "BookComment",
     "BookReadingStatus",
   ],
 });

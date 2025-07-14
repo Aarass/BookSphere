@@ -9,3 +9,4 @@ CREATE CONSTRAINT genre_name FOR (n:Genre) REQUIRE n.name IS UNIQUE;
 
 CREATE CONSTRAINT rating FOR ()-[r:HAS_RATED]-() REQUIRE (r._start, r._end) IS UNIQUE;
 CREATE CONSTRAINT reading FOR ()-[r:IS_READING]-() REQUIRE (r._start, r._end) IS UNIQUE;
+CREATE CONSTRAINT commenting FOR ()-[r:HAS_COMMENTED]-() REQUIRE (r._start, r._end) IS UNIQUE;

@@ -3,6 +3,7 @@ import {
   isValidCreateCommentDto,
   isValidCreateRatingDto,
   isValidSetReadingStatus,
+  isValidUpdateCommentDto,
   isValidUpdateRatingDto,
 } from "@interfaces/dtos/bookDto";
 import express from "express";
@@ -130,6 +131,24 @@ router.post("/books/:isbn/comments", authenticate, async (req, res, next) => {
   }
 });
 
+router.put("/books/:isbn/comments/my", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  const body = req.body;
+  if (!isValidUpdateCommentDto(body)) {
+    return next(createHttpError(400, `Bad request`));
+  }
+
+  try {
+    await commentService.updateComment(isbn, userId, body);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
 router.get("/books/:isbn/comments", async (req, res, next) => {
   const isbn = req.params["isbn"];
 
@@ -142,23 +161,35 @@ router.get("/books/:isbn/comments", async (req, res, next) => {
   }
 });
 
-router.delete("/books/:isbn/comments", authenticate, async (req, res, next) => {
+router.get("/books/:isbn/comments/my", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
   const userId = req.session.data.userId!;
 
-  const body = req.body;
-  if (!isValidCreateCommentDto(body)) {
-    return next(createHttpError(400, `Bad request`));
-  }
-
   try {
-    const result = await commentService.deleteComment(isbn, userId, body);
-    res.status(200).send(result);
+    const comment = await commentService.getComment(userId, isbn);
+    res.status(200).send(comment);
   } catch (err) {
     console.error(err);
     return next(createHttpError(500, `Something went wrong`));
   }
 });
+
+router.delete(
+  "/books/:isbn/comments/my",
+  authenticate,
+  async (req, res, next) => {
+    const isbn = req.params["isbn"];
+    const userId = req.session.data.userId!;
+
+    try {
+      const result = await commentService.deleteComment(isbn, userId);
+      res.status(200).send(result);
+    } catch (err) {
+      console.error(err);
+      return next(createHttpError(500, `Something went wrong`));
+    }
+  },
+);
 
 router.post("/books/:isbn/ratings", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];
