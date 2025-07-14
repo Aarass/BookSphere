@@ -11,6 +11,8 @@ export const api = createApi({
   tagTypes: [
     "User",
     "Book",
+    "BookClub",
+    "BookClubRoom",
     "BookStats",
     "MyBookRating",
     "BookComment",

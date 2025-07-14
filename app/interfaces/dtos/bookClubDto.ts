@@ -1,12 +1,12 @@
 export interface CreateBookClubDto {
-  title: string;
+  tittle: string;
   description: string;
 }
 
 export function isValidCreateBookClubDto(
-  dto: Partial<CreateBookClubDto>
+  dto: Partial<CreateBookClubDto>,
 ): dto is CreateBookClubDto {
-  if (!dto.title || !dto.description) {
+  if (!dto.tittle || !dto.description) {
     return false;
   }
   return true;

@@ -3,22 +3,22 @@ import { getSession, query } from "../drivers/neo4j";
 import { v4 as uuidv4 } from "uuid";
 
 class BookClubRepository {
-  async create(title: string, description: string) {
+  async create(tittle: string, description: string) {
     let session = getSession();
 
     let result = await query<BookClub>(
       session,
       `CREATE (n:BookClub {
         id: $id,
-        title: $title,
+        tittle: $tittle,
         description: $description
       })
       return ${toBookClub("n")}`,
       {
         id: uuidv4(),
-        title,
+        tittle,
         description,
-      }
+      },
     );
 
     await session.close();
@@ -39,11 +39,38 @@ class BookClubRepository {
         CASE WHEN r IS NOT NULL THEN true ELSE false END AS isJoined`,
       {
         userId,
-      }
+      },
     );
 
     await session.close();
     return result;
+  }
+
+  async getById(id: string, userId: string | null) {
+    let session = getSession();
+
+    let result = await query<BookClubWithMembershipStatus>(
+      session,
+      `MATCH (b:BookClub {id: $id})
+        OPTIONAL MATCH (:User {id: $userId})-[r:IS_MEMBER_OF]->(b) return ${toBookClub("b")},
+        CASE WHEN r IS NOT NULL THEN true ELSE false END AS isJoined`,
+      {
+        id,
+        userId,
+      },
+    );
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    if (result.length > 1) {
+      throw "Internal error";
+    }
+
+    await session.close();
+
+    return result[0];
   }
 
   async getJoined(userId: string) {
@@ -53,7 +80,7 @@ class BookClubRepository {
       `MATCH (:User {id: $userId})-[:IS_MEMBER_OF]->(n:BookClub) return ${toBookClub("n")}`,
       {
         userId,
-      }
+      },
     );
     await session.close();
 
@@ -62,17 +89,13 @@ class BookClubRepository {
 
   async join(bookClubId: string, userId: string) {
     let session = getSession();
-    // TODO _maybe_
-    // Maybe we should check if relations is already there.
-    // This way, duplicate relation could be created, but it's not a big deal
-
     let result = await session.run(
       `MATCH (user:User {id: $userId}), (bookClub:BookClub {id: $bookClubId})
-       CREATE (user)-[:IS_MEMBER_OF]->(bookClub)`,
+       CREATE (user)-[:IS_MEMBER_OF {_start: $userId, _end: $bookClubId}]->(bookClub)`,
       {
         userId,
         bookClubId,
-      }
+      },
     );
 
     let createdCount = result.summary.counters.updates().relationshipsCreated;
@@ -91,7 +114,7 @@ class BookClubRepository {
       {
         userId,
         bookClubId,
-      }
+      },
     );
 
     let deletedCount = result.summary.counters.updates().relationshipsDeleted;
@@ -111,7 +134,7 @@ class BookClubRepository {
       {
         bookClubId,
         roomId,
-      }
+      },
     );
 
     let createdCount = result.summary.counters.updates().relationshipsCreated;
@@ -128,7 +151,7 @@ export const bookClubRepository = new BookClubRepository();
 function toBookClub(bookClubVar: string) {
   return `
     ${bookClubVar}.id as id,
-    ${bookClubVar}.title as title,
+    ${bookClubVar}.tittle as tittle,
     ${bookClubVar}.description as description
   `;
 }

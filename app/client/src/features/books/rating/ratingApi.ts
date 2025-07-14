@@ -21,6 +21,7 @@ export const apiWithRating = api.injectEndpoints({
       query: ({ isbn, value }) => ({
         url: `/books/${isbn}/ratings`,
         method: "POST",
+        responseHandler: "text",
         body: {
           value,
         } satisfies CreateRatingDto,
@@ -43,6 +44,7 @@ export const apiWithRating = api.injectEndpoints({
         body: {
           value,
         } satisfies UpdateRatingDto,
+        responseHandler: "text",
       }),
       invalidatesTags: (_result, _error, { isbn }) => [
         {
@@ -56,6 +58,7 @@ export const apiWithRating = api.injectEndpoints({
       query: (isbn) => ({
         url: `/books/${isbn}/ratings`,
         method: "DELETE",
+        responseHandler: "text",
       }),
       invalidatesTags: (_result, _error, isbn) => [
         {

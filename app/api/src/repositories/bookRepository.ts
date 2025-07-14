@@ -191,7 +191,7 @@ class BookRepository {
       result = await query<Comment>(
         neo4j,
         `MATCH (u:User {id: $userId}), (b:Book {isbn: $isbn})
-      CREATE (u)-[r:HAS_COMMENTED {timestamp: $timestamp, comment: $content}]->(b)
+      CREATE (u)-[r:HAS_COMMENTED {timestamp: $timestamp, comment: $content, _start: $userId, _end: $isbn}]->(b)
       return ${toComment("r", "u", "b")}`,
         {
           timestamp: Date.now(),
@@ -229,8 +229,6 @@ class BookRepository {
     } finally {
       await session.close();
     }
-
-    console.log(result.summary);
 
     const updates = result.summary.counters.updates();
 

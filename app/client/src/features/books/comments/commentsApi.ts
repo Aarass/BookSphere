@@ -32,9 +32,15 @@ export const apiWithComments = api.injectEndpoints({
         url: `/books/${isbn}/comments`,
         method: "POST",
         body: dto,
+        responseHandler: "text",
       }),
-      onCacheEntryAdded: () => {
-        toast("Comment successfully posted");
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast("Successfully left the book club");
+        } catch {
+          toast("There was an error while trying to left a book club");
+        }
       },
       invalidatesTags: (_result, _error, { isbn }) => [
         {
@@ -56,9 +62,15 @@ export const apiWithComments = api.injectEndpoints({
         url: `/books/${isbn}/comments/my`,
         method: "PUT",
         body: dto,
+        responseHandler: "text",
       }),
-      onCacheEntryAdded: () => {
-        toast("Comment successfully updated");
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast("Successfully left the book club");
+        } catch {
+          toast("There was an error while trying to left a book club");
+        }
       },
       invalidatesTags: (_result, _error, { isbn }) => [
         {
@@ -75,9 +87,15 @@ export const apiWithComments = api.injectEndpoints({
       query: ({ isbn }) => ({
         url: `/books/${isbn}/comments/my`,
         method: "DELETE",
+        responseHandler: "text",
       }),
-      onCacheEntryAdded: () => {
-        toast("Comment successfully deleted");
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast("Successfully left the book club");
+        } catch {
+          toast("There was an error while trying to left a book club");
+        }
       },
       invalidatesTags: (_result, _error, { isbn }) => [
         {

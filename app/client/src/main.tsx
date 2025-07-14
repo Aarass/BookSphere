@@ -1,18 +1,21 @@
+import { Toaster } from "@/components/ui/sonner";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { store } from "./app/store";
+import { tryRestoreSession } from "./features/auth/authSlice";
+import { Login } from "./features/auth/login/LoginComponent";
+import { Book } from "./features/books/Book";
+import { BookList } from "./features/books/BookList";
+import { CreateBook } from "./features/books/CreateBook";
 import "./index.css";
 import { AuthPage } from "./pages/AuthPage";
-import { MustBeLoggedInGuard } from "./routing/Guard";
-import { Login } from "./features/auth/login/LoginComponent";
 import { HomePage } from "./pages/HomePage";
-import { tryRestoreSession } from "./features/auth/authSlice";
-import { CreateBook } from "./features/books/CreateBook";
-import { BookList } from "./features/books/BookList";
-import { Toaster } from "@/components/ui/sonner";
-import { Book } from "./features/books/Book";
+import { MustBeLoggedInGuard } from "./routing/Guard";
+import { AllBookClubs } from "./features/clubs/AllBookClubs";
+import { JoinedBookClubs } from "./features/clubs/JoinedBookClubs";
+import { BookClubPage } from "./pages/BookClubPage";
 
 store.dispatch(tryRestoreSession());
 
@@ -23,35 +26,43 @@ if (container) {
 
   root.render(
     <React.StrictMode>
-      <Provider store={store}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/">
-              <Route index element={<p>landpage</p>} />
+      <div className="min-h-svh flex flex-col">
+        <Provider store={store}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/">
+                <Route index element={<p>landpage</p>} />
 
-              <Route element={<MustBeLoggedInGuard />}>
-                <Route path="books">
-                  <Route index element={<BookList />} />
-                  <Route path=":isbn" element={<Book />} />
-                  <Route path="create" element={<CreateBook />} />
+                <Route element={<MustBeLoggedInGuard />}>
+                  <Route path="books">
+                    <Route index element={<BookList />} />
+                    <Route path=":isbn" element={<Book />} />
+                    <Route path="create" element={<CreateBook />} />
+                  </Route>
+
+                  <Route path="clubs">
+                    <Route index element={<AllBookClubs />} />
+                    <Route path="joined" element={<JoinedBookClubs />} />
+                    <Route path=":id" element={<BookClubPage />} />
+                  </Route>
+
+                  <Route path="home" element={<HomePage />} />
+                  <Route path="profile" element={<p>profile</p>} />
                 </Route>
 
-                <Route path="home" element={<HomePage />} />
-                <Route path="profile" element={<p>profile</p>} />
-              </Route>
-
-              <Route path="auth">
-                <Route element={<AuthPage />}>
-                  <Route path="login" element={<Login />} />
-                  <Route path="register" element={<p>register</p>} />
+                <Route path="auth">
+                  <Route element={<AuthPage />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<p>register</p>} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+          </BrowserRouter>
 
-        <Toaster />
-      </Provider>
+          <Toaster />
+        </Provider>
+      </div>
     </React.StrictMode>,
   );
 } else {

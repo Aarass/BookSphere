@@ -29,6 +29,7 @@ export const apiWithBooks = api.injectEndpoints({
       query: (isbn) => ({
         url: `/books/${isbn}`,
         method: "DELETE",
+        responseHandler: "text",
       }),
       invalidatesTags: (_result, _error, isbn) => {
         return [
@@ -61,6 +62,7 @@ export const apiWithBooks = api.injectEndpoints({
         url: `/books/${isbn}/reading-status`,
         method: "PUT",
         body: dto,
+        responseHandler: "text",
       }),
       invalidatesTags: (_result, _error, { isbn }) => {
         return [

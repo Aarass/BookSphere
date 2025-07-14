@@ -43,57 +43,24 @@ router.get("/book-clubs", async (req, res, next) => {
   }
 });
 
-router.get("/book-clubs/:id/rooms", async (req, res, next) => {
-  let bookClubId = req.params["id"];
-
-  try {
-    let rooms = await roomService.getAllInBookClub(bookClubId);
-    res.status(200).send(rooms);
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(400, "Fail"));
-  }
-});
-
-router.post("/book-clubs/:bid/rooms/:rid/messages", async (req, res, next) => {
-  let bookClubId = req.params["bid"];
-  let roomId = req.params["rid"];
-  let body = req.body as Partial<ReadMessagesDto>;
-  if (!isValidReadMessagesDto(body)) {
-    return next(createHttpError(400, "Bad request"));
-  }
-
-  try {
-    let messages = await messageService.getMessages(body, bookClubId, roomId);
-    res.status(200).send(messages);
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(400, "Fail"));
-  }
-});
-
-router.post("/book-clubs/:id/rooms", authenticate, async (req, res, next) => {
-  let bookClubId = req.params["id"];
-
-  let body = req.body as Partial<CreateRoomDto>;
-  if (!isValidCreateRoomDto(body)) {
-    return next(createHttpError(400, "Bad request"));
-  }
-
-  try {
-    let room = await roomService.createRoom(bookClubId, body);
-    res.status(200).send(room);
-  } catch (err) {
-    console.error(err);
-    return next(createHttpError(400, "Fail"));
-  }
-});
-
 router.get("/book-clubs/joined", authenticate, async (req, res, next) => {
   let userId = req.session.data.userId!;
   try {
     let clubs = await bookClubService.getJoinedBookClubs(userId);
     res.status(200).send(clubs);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(400, "Fail"));
+  }
+});
+
+router.get("/book-clubs/:id", async (req, res, next) => {
+  let bookClubId = req.params["id"];
+  let userId = req.session.data?.userId ?? null;
+
+  try {
+    let club = await bookClubService.getBookClub(bookClubId, userId);
+    res.status(200).send(club);
   } catch (err) {
     console.error(err);
     return next(createHttpError(400, "Fail"));
@@ -120,6 +87,52 @@ router.post("/book-clubs/:id/leave", authenticate, async (req, res, next) => {
   try {
     await bookClubService.leaveBookClub(bookClubId, userId);
     res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(400, "Fail"));
+  }
+});
+
+router.get("/book-clubs/:id/rooms", async (req, res, next) => {
+  let bookClubId = req.params["id"];
+
+  try {
+    let rooms = await roomService.getAllInBookClub(bookClubId);
+    res.status(200).send(rooms);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(400, "Fail"));
+  }
+});
+
+router.post("/book-clubs/:id/rooms", authenticate, async (req, res, next) => {
+  let bookClubId = req.params["id"];
+
+  let body = req.body as Partial<CreateRoomDto>;
+  if (!isValidCreateRoomDto(body)) {
+    return next(createHttpError(400, "Bad request"));
+  }
+
+  try {
+    let room = await roomService.createRoom(bookClubId, body);
+    res.status(200).send(room);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(400, "Fail"));
+  }
+});
+
+router.post("/book-clubs/:bid/rooms/:rid/messages", async (req, res, next) => {
+  let bookClubId = req.params["bid"];
+  let roomId = req.params["rid"];
+  let body = req.body as Partial<ReadMessagesDto>;
+  if (!isValidReadMessagesDto(body)) {
+    return next(createHttpError(400, "Bad request"));
+  }
+
+  try {
+    let messages = await messageService.getMessages(body, bookClubId, roomId);
+    res.status(200).send(messages);
   } catch (err) {
     console.error(err);
     return next(createHttpError(400, "Fail"));
