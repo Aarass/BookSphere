@@ -37,9 +37,9 @@ export const apiWithComments = api.injectEndpoints({
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
-          toast("Successfully left the book club");
+          toast("Successfully posted the comment");
         } catch {
-          toast("There was an error while trying to left a book club");
+          toast("There was an error while trying to post a comment");
         }
       },
       invalidatesTags: (_result, _error, { isbn }) => [
@@ -67,9 +67,9 @@ export const apiWithComments = api.injectEndpoints({
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
-          toast("Successfully left the book club");
+          toast("Successfully updated the comment");
         } catch {
-          toast("There was an error while trying to left a book club");
+          toast("There was an error while trying to update a comment");
         }
       },
       invalidatesTags: (_result, _error, { isbn }) => [
@@ -92,9 +92,9 @@ export const apiWithComments = api.injectEndpoints({
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
-          toast("Successfully left the book club");
+          toast("Successfully deleted the comment");
         } catch {
-          toast("There was an error while trying to left a book club");
+          toast("There was an error while trying to delete a comment");
         }
       },
       invalidatesTags: (_result, _error, { isbn }) => [
