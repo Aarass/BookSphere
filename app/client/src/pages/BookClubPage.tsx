@@ -1,13 +1,14 @@
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   useGetBookClubByIdQuery,
   useJoinBookClubMutation,
   useLeaveBookClubMutation,
 } from "@/features/clubs/bookClubsApi";
-import { useParams } from "react-router";
-import { Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { AllRooms } from "@/features/clubs/rooms/AllRooms";
 import { BookClub } from "@interfaces/bookClub";
+import { Loader2Icon, Lock, LogOut } from "lucide-react";
+import { useParams } from "react-router";
 
 export function BookClubPage() {
   let { id } = useParams();
@@ -15,6 +16,7 @@ export function BookClubPage() {
 
   const { data: club, isLoading } = useGetBookClubByIdQuery(id);
   const [join, { isLoading: joining }] = useJoinBookClubMutation();
+  const [leave, { isLoading: leaving }] = useLeaveBookClubMutation();
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -25,10 +27,36 @@ export function BookClubPage() {
   }
 
   return (
-    <div className="w-full h-full grow p-4 flex flex-col">
-      <h1 className="text-2xl font-bold">{club.tittle}</h1>
-      <p className="opacity-80">{club.description}</p>
-      <Separator className="mt-1" />
+    <div className="w-full h-full grow p-4 flex flex-col gap-4">
+      <div className="grid grid-cols-[auto_min-content] ">
+        <div>
+          <h1 className="text-2xl font-bold">{club.tittle}</h1>
+          <p className="opacity-80">{club.description}</p>
+        </div>
+
+        {club.isJoined ? (
+          <Button
+            variant="destructive"
+            onClick={() => {
+              leave(club.id);
+            }}
+            disabled={leaving}
+          >
+            {leaving ? (
+              <>
+                <Loader2Icon className="animate-spin" />
+                Leaving
+              </>
+            ) : (
+              <>
+                <LogOut />
+                Leave
+              </>
+            )}
+          </Button>
+        ) : null}
+      </div>
+      <Separator />
       {club.isJoined ? (
         <UnlockedContent club={club} />
       ) : (
@@ -46,7 +74,14 @@ export function BookClubPage() {
               join(id);
             }}
           >
-            Join
+            {joining ? (
+              <>
+                <Loader2Icon className="animate-spin" />
+                Joining
+              </>
+            ) : (
+              "Join"
+            )}
           </Button>
         </div>
       )}
@@ -55,16 +90,9 @@ export function BookClubPage() {
 }
 
 function UnlockedContent({ club }: { club: BookClub }) {
-  const [leave, { isLoading: leaving }] = useLeaveBookClubMutation();
-
   return (
-    <Button
-      variant="destructive"
-      onClick={() => {
-        leave(club.id);
-      }}
-    >
-      Leave
-    </Button>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
+      <AllRooms club={club} />
+    </div>
   );
 }

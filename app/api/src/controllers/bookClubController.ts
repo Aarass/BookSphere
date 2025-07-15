@@ -122,6 +122,19 @@ router.post("/book-clubs/:id/rooms", authenticate, async (req, res, next) => {
   }
 });
 
+router.get("/book-clubs/:clubId/rooms/:roomId", async (req, res, next) => {
+  let bookClubId = req.params["clubId"];
+  let roomId = req.params["roomId"];
+
+  try {
+    let room = await roomService.getRoomById(bookClubId, roomId);
+    res.status(200).send(room);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(400, "Fail"));
+  }
+});
+
 router.post("/book-clubs/:bid/rooms/:rid/messages", async (req, res, next) => {
   let bookClubId = req.params["bid"];
   let roomId = req.params["rid"];

@@ -3,22 +3,22 @@ import { getSession, query } from "../drivers/neo4j";
 import { Room } from "@interfaces/room";
 
 class RoomRepository {
-  async create(title: string, description: string) {
+  async create(tittle: string, description: string) {
     let session = getSession();
 
     let result = await query<Room>(
       session,
       `CREATE (n:Room {
         id: $id,
-        title: $title,
+        tittle: $tittle,
         description: $description
       })
       return ${toRoom("n")}`,
       {
         id: uuidv4(),
-        title,
+        tittle,
         description,
-      }
+      },
     );
 
     await session.close();
@@ -37,11 +37,33 @@ class RoomRepository {
       session,
       `Match (n:BookClub {id: $bookClubId})-[:OWNS]->(r:Room)
        return ${toRoom("r")}`,
-      { bookClubId }
+      { bookClubId },
     );
 
     await session.close();
     return result;
+  }
+
+  async getRoomById(bookClubId: string, roomId: string) {
+    let session = getSession();
+
+    let result = await query<Room>(
+      session,
+      `Match (n:BookClub {id: $bookClubId})-[:OWNS]->(r:Room {id: $roomId})
+       return ${toRoom("r")}`,
+      { bookClubId, roomId },
+    );
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    if (result.length > 1) {
+      throw "Internal error";
+    }
+
+    await session.close();
+    return result[0];
   }
 }
 
@@ -50,7 +72,7 @@ export const roomRepository = new RoomRepository();
 function toRoom(roomVar: string) {
   return `
     ${roomVar}.id as id,
-    ${roomVar}.title as title,
+    ${roomVar}.tittle as tittle,
     ${roomVar}.description as description
   `;
 }

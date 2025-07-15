@@ -18,6 +18,7 @@ import { JoinedBookClubs } from "./features/clubs/JoinedBookClubs";
 import { BookClubPage } from "./pages/BookClubPage";
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { ModeToggle } from "./components/ui/custom/themeToggle";
+import { Room } from "./features/clubs/rooms/Room";
 
 store.dispatch(tryRestoreSession());
 
@@ -47,7 +48,13 @@ if (container) {
                     <Route path="clubs">
                       <Route index element={<AllBookClubs />} />
                       <Route path="joined" element={<JoinedBookClubs />} />
-                      <Route path=":id" element={<BookClubPage />} />
+                      <Route path=":id">
+                        <Route index element={<BookClubPage />} />
+                        <Route path="rooms">
+                          <Route index element={<BookClubPage />} />
+                          <Route path=":roomId" element={<Room />} />
+                        </Route>
+                      </Route>
                     </Route>
 
                     <Route path="home" element={<HomePage />} />

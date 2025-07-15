@@ -3,7 +3,7 @@ import { bookClubRepository } from "../repositories/bookClubRepository";
 import { roomRepository } from "../repositories/roomRepository";
 
 async function createRoom(bookClubId: string, data: CreateRoomDto) {
-  let newRoom = await roomRepository.create(data.title, data.description);
+  let newRoom = await roomRepository.create(data.tittle, data.description);
   await bookClubRepository.takeOwnershipOfRoom(bookClubId, newRoom.id);
 
   return newRoom;
@@ -13,4 +13,8 @@ async function getAllInBookClub(bookClubId: string) {
   return await roomRepository.getAllInBookClub(bookClubId);
 }
 
-export default { createRoom, getAllInBookClub };
+async function getRoomById(bookClubId: string, roomId: string) {
+  return await roomRepository.getRoomById(bookClubId, roomId);
+}
+
+export default { createRoom, getAllInBookClub, getRoomById };
