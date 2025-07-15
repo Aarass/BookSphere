@@ -3,6 +3,7 @@ import { Socket } from "socket.io";
 import messageService from "../services/messageService";
 
 export function socketListener(socket: Socket) {
+  console.log("Connection");
   const session = (socket.request as Request).session;
   const query = socket.handshake.query;
 
@@ -23,7 +24,7 @@ export function socketListener(socket: Socket) {
     roomId,
     (newMessage) => {
       socket.send(newMessage);
-    }
+    },
   );
   socket.on("disconnect", unsubscribe);
 
@@ -39,7 +40,7 @@ export function socketListener(socket: Socket) {
         roomId,
         content,
       },
-      userId
+      userId,
     );
   });
 }

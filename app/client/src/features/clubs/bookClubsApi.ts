@@ -1,7 +1,9 @@
 import { api } from "@/app/store";
-import { Book, ReadingStatus } from "@interfaces/book";
 import { BookClub, BookClubWithMembershipStatus } from "@interfaces/bookClub";
 import { CreateBookClubDto } from "@interfaces/dtos/bookClubDto";
+import { Room } from "@interfaces/room";
+import { useEffect, useRef } from "react";
+import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
 
 export const apiWithBookClubs = api.injectEndpoints({
@@ -85,6 +87,47 @@ export const apiWithBookClubs = api.injectEndpoints({
     }),
   }),
 });
+
+export function useSendMessage({
+  bookClubId,
+  roomId,
+}: {
+  bookClubId: BookClub["id"];
+  roomId: Room["id"];
+}) {
+  const socket = useRef<Socket>(null);
+
+  useEffect(() => {
+    socket.current = io("http://localhost:3000", {
+      query: {
+        bookClubId,
+        roomId,
+      },
+      autoConnect: true,
+      withCredentials: true,
+    });
+
+    socket.current.on("connect", () => {
+      console.log("Connected");
+    });
+
+    socket.current.on("disconnect", () => {
+      console.log("Disconnected");
+    });
+
+    return () => {
+      socket.current?.disconnect();
+    };
+  }, [bookClubId, roomId]);
+
+  function sendMessage(message: string) {
+    socket.current?.send(message);
+    //
+    // .send("message", message);
+  }
+
+  return sendMessage;
+}
 
 export const {
   useGetAllBookClubsQuery,

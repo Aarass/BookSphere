@@ -7,7 +7,7 @@ class MessageRepository {
     content: string,
     bookClubId: string,
     roomId: string,
-    authorId: string
+    authorId: string,
   ) {
     const client = getClient();
 
@@ -43,7 +43,7 @@ class MessageRepository {
     beforeTimestamp: number,
     limit: number,
     bookClubId: string,
-    roomId: string
+    roomId: string,
   ) {
     const client = getClient();
     const key = `msgs:${bookClubId}:${roomId}`;

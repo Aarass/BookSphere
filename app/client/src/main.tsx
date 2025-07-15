@@ -30,8 +30,11 @@ if (container) {
   root.render(
     <React.StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <div className="min-h-svh flex flex-col">
-          <ModeToggle />
+        <div className="h-svh flex flex-col">
+          <nav className="w-full flex justify-between p-2">
+            <div />
+            <ModeToggle />
+          </nav>
           <Provider store={store}>
             <BrowserRouter>
               <Routes>

@@ -58,7 +58,7 @@ class UserRepository {
 
     let result = await query<User>(
       session,
-      `CREATE (n:User {id: $id, username: $username, passhash: $passhash, firstName: $firstName, lastName: $lastName}) return ${toUser("n")}`,
+      `CREATE (n:User {id: $id, username: $username, passhash: $passhash, firstName: $firstName, lastName: $lastName, color :$color}) return ${toUser("n")}`,
       {
         id: uuidv4(),
         username,
@@ -86,6 +86,7 @@ function toUser(userVar: string) {
     ${userVar}.username as username,
     ${userVar}.passhash as passhash,
     ${userVar}.firstName as firstName,
-    ${userVar}.lastName as lastName
+    ${userVar}.lastName as lastName,
+    ${userVar}.color as color
   `;
 }
