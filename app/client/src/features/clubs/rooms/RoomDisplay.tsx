@@ -10,19 +10,17 @@ import { useNavigate } from "react-router";
 
 export function RoomDisplay({ room, club }: { room: Room; club: BookClub }) {
   const navigate = useNavigate();
+
   return (
-    <Card key={room.id} className="cursor-pointer">
+    <Card className="relative">
       <button
-        style={{ textAlign: "unset" }}
-        onClick={() => {
-          navigate(`/clubs/${club.id}/rooms/${room.id}`);
-        }}
-      >
-        <CardHeader>
-          <CardTitle>{room.tittle}</CardTitle>
-          <CardDescription>{room.description}</CardDescription>
-        </CardHeader>
-      </button>
+        className="absolute inset-0 cursor-pointer"
+        onClick={() => navigate(`/clubs/${club.id}/rooms/${room.id}`)}
+      />
+      <CardHeader>
+        <CardTitle>{room.tittle}</CardTitle>
+        <CardDescription>{room.description}</CardDescription>
+      </CardHeader>
     </Card>
   );
 }
