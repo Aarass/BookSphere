@@ -1,41 +1,34 @@
 import { Toaster } from "@/components/ui/sonner";
+import { Globe } from "lucide-react";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import {
-  BrowserRouter,
-  Link,
-  NavLink,
-  Outlet,
-  Route,
-  Routes,
-} from "react-router";
+import { BrowserRouter, Link, Outlet, Route, Routes } from "react-router";
 import { store } from "./app/store";
-import { tryRestoreSession } from "./features/auth/authSlice";
+import { ModeToggle } from "./components/ui/custom/themeToggle";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from "./components/ui/navigation-menu";
+import { ThemeProvider } from "./components/ui/theme-provider";
+import { selectIsLoggedIn, tryRestoreSession } from "./features/auth/authSlice";
 import { Login } from "./features/auth/login/LoginComponent";
 import { Book } from "./features/books/Book";
 import { BookList } from "./features/books/BookList";
 import { CreateBook } from "./features/books/CreateBook";
-import "./index.css";
-import { AuthPage } from "./pages/AuthPage";
-import { HomePage } from "./pages/HomePage";
-import { MustBeLoggedInGuard } from "./routing/Guard";
 import { AllBookClubs } from "./features/clubs/AllBookClubs";
 import { JoinedBookClubs } from "./features/clubs/JoinedBookClubs";
-import { BookClubPage } from "./pages/BookClubPage";
-import { ThemeProvider } from "./components/ui/theme-provider";
-import { ModeToggle } from "./components/ui/custom/themeToggle";
 import { Room } from "./features/clubs/rooms/Room";
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  navigationMenuTriggerStyle,
-  NavigationMenuTrigger,
-  NavigationMenuContent,
-} from "./components/ui/navigation-menu";
-import { Globe } from "lucide-react";
+import "./index.css";
+import { AuthPage } from "./pages/AuthPage";
+import { BookClubPage } from "./pages/BookClubPage";
+import { HomePage } from "./pages/HomePage";
+import { MustBeLoggedInGuard } from "./routing/Guard";
+import { useAppSelector } from "./app/hooks";
+import { LandPage } from "./pages/LandPage";
 
 store.dispatch(tryRestoreSession());
 
@@ -47,100 +40,138 @@ if (container) {
   root.render(
     <React.StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <div className="h-svh flex flex-col">
-          <Provider store={store}>
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  element={
-                    <>
-                      <div>
-                        <NavigationMenu className="w-full max-w-none p-2">
-                          <NavigationMenuList>
-                            <NavigationMenuItem>
-                              <NavigationMenuLink
-                                asChild
-                                className={navigationMenuTriggerStyle()}
-                              >
-                                <Link to={"/"}>
-                                  <Globe />
-                                </Link>
-                              </NavigationMenuLink>
-                            </NavigationMenuItem>
+        <Provider store={store}>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<NavBar />}>
+                <Route path="/">
+                  <Route index element={<LandPage />} />
 
-                            <NavigationMenuItem>
-                              <NavigationMenuLink
-                                asChild
-                                className={navigationMenuTriggerStyle()}
-                              >
-                                <Link to={"/books"}>Books</Link>
-                              </NavigationMenuLink>
-                            </NavigationMenuItem>
-
-                            <NavigationMenuItem>
-                              <NavigationMenuLink
-                                asChild
-                                className={navigationMenuTriggerStyle()}
-                              >
-                                <Link to={"/clubs"}>Clubs</Link>
-                              </NavigationMenuLink>
-                            </NavigationMenuItem>
-                          </NavigationMenuList>
-                          <div className="ml-auto">
-                            <ModeToggle />
-                          </div>
-                        </NavigationMenu>
-                      </div>
-                      <Outlet />
-                    </>
-                  }
-                >
-                  <Route path="/">
-                    <Route index element={<p>landpage</p>} />
-
-                    <Route element={<MustBeLoggedInGuard />}>
-                      <Route path="books">
-                        <Route index element={<BookList />} />
-                        <Route path=":isbn" element={<Book />} />
-                        <Route path="create" element={<CreateBook />} />
-                      </Route>
-
-                      <Route path="clubs">
-                        <Route index element={<AllBookClubs />} />
-                        <Route path="joined" element={<JoinedBookClubs />} />
-                        <Route path=":id">
-                          <Route index element={<BookClubPage />} />
-                          <Route path="rooms">
-                            <Route index element={<BookClubPage />} />
-                            <Route path=":roomId" element={<Room />} />
-                          </Route>
-                        </Route>
-                      </Route>
-
-                      <Route path="home" element={<HomePage />} />
-                      <Route path="profile" element={<p>profile</p>} />
+                  <Route element={<MustBeLoggedInGuard />}>
+                    <Route path="books">
+                      <Route index element={<BookList />} />
+                      <Route path=":isbn" element={<Book />} />
+                      <Route path="create" element={<CreateBook />} />
                     </Route>
 
-                    <Route path="auth">
-                      <Route element={<AuthPage />}>
-                        <Route path="login" element={<Login />} />
-                        <Route path="register" element={<p>register</p>} />
+                    <Route path="clubs">
+                      <Route index element={<AllBookClubs />} />
+                      <Route path="joined" element={<JoinedBookClubs />} />
+                      <Route path=":id">
+                        <Route index element={<BookClubPage />} />
+                        <Route path="rooms">
+                          <Route index element={<BookClubPage />} />
+                          <Route path=":roomId" element={<Room />} />
+                        </Route>
                       </Route>
+                    </Route>
+
+                    <Route path="home" element={<HomePage />} />
+                    <Route path="profile" element={<p>profile</p>} />
+                  </Route>
+
+                  <Route path="auth">
+                    <Route element={<AuthPage />}>
+                      <Route path="login" element={<Login />} />
+                      <Route path="register" element={<p>register</p>} />
                     </Route>
                   </Route>
                 </Route>
-              </Routes>
-            </BrowserRouter>
+              </Route>
+            </Routes>
+          </BrowserRouter>
 
-            <Toaster />
-          </Provider>
-        </div>
+          <Toaster />
+        </Provider>
       </ThemeProvider>
     </React.StrictMode>,
   );
 } else {
   throw new Error(
     "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
+  );
+}
+
+function NavBar() {
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+
+  return (
+    <div className="h-svh flex flex-col">
+      <div className="flex p-2">
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
+                <Link to={"/"}>
+                  <Globe />
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
+                <Link to={"/home"}>Home</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
+                <Link to={"/books"}>Books</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
+                <Link to={"/clubs"}>Clubs</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        <div className="grow"></div>
+
+        {isLoggedIn ? null : (
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to={"/auth/login"}>Login</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to={"#"}>Register</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        )}
+
+        <div className="ml-10">
+          <ModeToggle />
+        </div>
+      </div>
+      <Outlet />
+    </div>
   );
 }
 

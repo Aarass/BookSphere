@@ -11,7 +11,7 @@ export function MustBeLoggedInGuard() {
     return <Outlet />;
   } else if (status === "logged_out") {
     return (
-      <div>
+      <div className="flex-1 flex flex-col items-center justify-center">
         <p>
           <strong>You must be logged in</strong>
         </p>

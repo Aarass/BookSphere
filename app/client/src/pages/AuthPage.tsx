@@ -7,7 +7,7 @@ export function AuthPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="flex min-h-svh items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <Outlet />
       </div>
     );
