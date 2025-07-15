@@ -21,9 +21,12 @@ export const apiWithRooms = api.injectEndpoints({
     >({
       query: ({ clubId, roomId }) => `/book-clubs/${clubId}/rooms/${roomId}`,
     }),
-    createRoom: builder.mutation<Room, CreateRoomDto>({
-      query: (dto) => ({
-        url: `/book-clubs/:id/rooms`,
+    createRoom: builder.mutation<
+      Room,
+      { clubId: BookClub["id"]; dto: CreateRoomDto }
+    >({
+      query: ({ clubId, dto }) => ({
+        url: `/book-clubs/${clubId}/rooms`,
         method: "POST",
         body: dto,
       }),

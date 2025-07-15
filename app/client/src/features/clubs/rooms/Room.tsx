@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessagesSquare, SendHorizontal } from "lucide-react";
+import { ArrowDown, MessagesSquare, SendHorizontal } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router";
 import { useGetMessagesQuery, useGetRoomByIdQuery } from "./roomsApi";
@@ -109,6 +109,17 @@ function MessagesList({ club, room }: { club: BookClub; room: RoomType }) {
     return <></>;
   }
 
+  if (messages.length === 0) {
+    return (
+      <>
+        <ArrowDown color="var(--secondary)" className="mx-auto mb-4" />
+        <p className="text-secondary text-center">
+          Be the first one to send a message.
+        </p>
+      </>
+    );
+  }
+
   return messages.map((current, index, array) => {
     const next = index < array.length - 1 ? array[index + 1] : null;
 
@@ -146,7 +157,8 @@ function ForeignMessage({
     <div className="flex items-end gap-2 ">
       <p>{message.body}</p>
       <p className="text-xs text-right p-0 m-0 -mb-1">
-        {date.getHours()}:{date.getMinutes()}
+        {date.getHours().toString().padStart(2, "0")}:
+        {date.getMinutes().toString().padStart(2, "0")}
       </p>
     </div>
   );
@@ -160,14 +172,18 @@ function ForeignMessage({
   } else {
     return (
       <div className="grid grid-cols-[min-content_auto] gap-4 mt-2">
-        <Avatar>
+        <Avatar className="relative">
           <AvatarFallback>{af}</AvatarFallback>
+          <div
+            style={{ backgroundColor: user.color }}
+            className="absolute inset-0 opacity-40 bg-blend-color"
+          ></div>
         </Avatar>
 
         <div className="flex relative">
           <div className="absolute left-3 top-1 w-4 h-4 -ml-4 bg-accent rotate-45 -z-10"></div>
           <div className={style}>
-            <p style={{ color: user.color }}>{user.username}</p>
+            <p className="font-bold">{user.username}</p>
             {fixedPart}
           </div>
         </div>
@@ -181,11 +197,19 @@ function MyMessage({ message }: { message: Message }) {
 
   return (
     <div className="flex ml-auto mt-0.5">
-      <div className={style + "bg-accent-foreground text-accent"}>
-        <div className="flex items-end gap-2 ">
+      <div
+        className={
+          style +
+          "bg-accent-foreground text-accent relative overflow-hidden z-0"
+        }
+      >
+        <div className="bg-background absolute z-1 inset-0 opacity-40"></div>
+
+        <div className="flex items-end gap-2 z-20">
           <p>{message.body}</p>
           <p className="text-xs text-right p-0 m-0 -mb-1">
-            {date.getHours()}:{date.getMinutes()}
+            {date.getHours().toString().padStart(2, "0")}:
+            {date.getMinutes().toString().padStart(2, "0")}
           </p>
         </div>
       </div>

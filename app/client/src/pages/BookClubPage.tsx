@@ -1,4 +1,20 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   useGetBookClubByIdQuery,
@@ -6,8 +22,10 @@ import {
   useLeaveBookClubMutation,
 } from "@/features/clubs/bookClubsApi";
 import { AllRooms } from "@/features/clubs/rooms/AllRooms";
+import { CreateRoomDialog } from "@/features/clubs/rooms/CreateRoom";
 import { BookClub } from "@interfaces/bookClub";
-import { Loader2Icon, Lock, LogOut } from "lucide-react";
+import { Loader2Icon, Lock, LogOut, Menu, PlusIcon } from "lucide-react";
+import { useState } from "react";
 import { useParams } from "react-router";
 
 export function BookClubPage() {
@@ -17,6 +35,8 @@ export function BookClubPage() {
   const { data: club, isLoading } = useGetBookClubByIdQuery(id);
   const [join, { isLoading: joining }] = useJoinBookClubMutation();
   const [leave, { isLoading: leaving }] = useLeaveBookClubMutation();
+
+  const [createRoomDialogOpen, setCreateRoomDialogOpen] = useState(false);
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -31,34 +51,51 @@ export function BookClubPage() {
       <div className="grid grid-cols-[auto_min-content] ">
         <div>
           <h1 className="text-2xl font-bold">{club.tittle}</h1>
-          <p className="opacity-80">{club.description}</p>
+          <p className="text-sm opacity-80">{club.description}</p>
         </div>
 
         {club.isJoined ? (
-          <Button
-            variant="destructive"
-            onClick={() => {
-              leave(club.id);
-            }}
-            disabled={leaving}
-          >
-            {leaving ? (
-              <>
-                <Loader2Icon className="animate-spin" />
-                Leaving
-              </>
-            ) : (
-              <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost">
+                <Menu />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Book Club Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setCreateRoomDialogOpen(true);
+                }}
+              >
+                <PlusIcon />
+                Create room
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => {
+                  leave(club.id);
+                }}
+                disabled={leaving}
+              >
                 <LogOut />
-                Leave
-              </>
-            )}
-          </Button>
+                Leave Club
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : null}
       </div>
       <Separator />
       {club.isJoined ? (
-        <UnlockedContent club={club} />
+        <>
+          <CreateRoomDialog
+            club={club}
+            open={createRoomDialogOpen}
+            setOpen={setCreateRoomDialogOpen}
+          />
+          <UnlockedContent club={club} />
+        </>
       ) : (
         <div className="w-full my-auto flex flex-col justify-center items-center relative gap-6">
           <div className="w-xs">
