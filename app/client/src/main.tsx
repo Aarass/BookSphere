@@ -2,7 +2,14 @@ import { Toaster } from "@/components/ui/sonner";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import { BrowserRouter, Route, Routes } from "react-router";
+import {
+  BrowserRouter,
+  Link,
+  NavLink,
+  Outlet,
+  Route,
+  Routes,
+} from "react-router";
 import { store } from "./app/store";
 import { tryRestoreSession } from "./features/auth/authSlice";
 import { Login } from "./features/auth/login/LoginComponent";
@@ -19,6 +26,16 @@ import { BookClubPage } from "./pages/BookClubPage";
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { ModeToggle } from "./components/ui/custom/themeToggle";
 import { Room } from "./features/clubs/rooms/Room";
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  navigationMenuTriggerStyle,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+} from "./components/ui/navigation-menu";
+import { Globe } from "lucide-react";
 
 store.dispatch(tryRestoreSession());
 
@@ -31,43 +48,84 @@ if (container) {
     <React.StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <div className="h-svh flex flex-col">
-          <nav className="w-full flex justify-between p-2">
-            <div />
-            <ModeToggle />
-          </nav>
           <Provider store={store}>
             <BrowserRouter>
               <Routes>
-                <Route path="/">
-                  <Route index element={<p>landpage</p>} />
+                <Route
+                  element={
+                    <>
+                      <div>
+                        <NavigationMenu className="w-full max-w-none p-2">
+                          <NavigationMenuList>
+                            <NavigationMenuItem>
+                              <NavigationMenuLink
+                                asChild
+                                className={navigationMenuTriggerStyle()}
+                              >
+                                <Link to={"/"}>
+                                  <Globe />
+                                </Link>
+                              </NavigationMenuLink>
+                            </NavigationMenuItem>
 
-                  <Route element={<MustBeLoggedInGuard />}>
-                    <Route path="books">
-                      <Route index element={<BookList />} />
-                      <Route path=":isbn" element={<Book />} />
-                      <Route path="create" element={<CreateBook />} />
-                    </Route>
+                            <NavigationMenuItem>
+                              <NavigationMenuLink
+                                asChild
+                                className={navigationMenuTriggerStyle()}
+                              >
+                                <Link to={"/books"}>Books</Link>
+                              </NavigationMenuLink>
+                            </NavigationMenuItem>
 
-                    <Route path="clubs">
-                      <Route index element={<AllBookClubs />} />
-                      <Route path="joined" element={<JoinedBookClubs />} />
-                      <Route path=":id">
-                        <Route index element={<BookClubPage />} />
-                        <Route path="rooms">
+                            <NavigationMenuItem>
+                              <NavigationMenuLink
+                                asChild
+                                className={navigationMenuTriggerStyle()}
+                              >
+                                <Link to={"/clubs"}>Clubs</Link>
+                              </NavigationMenuLink>
+                            </NavigationMenuItem>
+                          </NavigationMenuList>
+                          <div className="ml-auto">
+                            <ModeToggle />
+                          </div>
+                        </NavigationMenu>
+                      </div>
+                      <Outlet />
+                    </>
+                  }
+                >
+                  <Route path="/">
+                    <Route index element={<p>landpage</p>} />
+
+                    <Route element={<MustBeLoggedInGuard />}>
+                      <Route path="books">
+                        <Route index element={<BookList />} />
+                        <Route path=":isbn" element={<Book />} />
+                        <Route path="create" element={<CreateBook />} />
+                      </Route>
+
+                      <Route path="clubs">
+                        <Route index element={<AllBookClubs />} />
+                        <Route path="joined" element={<JoinedBookClubs />} />
+                        <Route path=":id">
                           <Route index element={<BookClubPage />} />
-                          <Route path=":roomId" element={<Room />} />
+                          <Route path="rooms">
+                            <Route index element={<BookClubPage />} />
+                            <Route path=":roomId" element={<Room />} />
+                          </Route>
                         </Route>
                       </Route>
+
+                      <Route path="home" element={<HomePage />} />
+                      <Route path="profile" element={<p>profile</p>} />
                     </Route>
 
-                    <Route path="home" element={<HomePage />} />
-                    <Route path="profile" element={<p>profile</p>} />
-                  </Route>
-
-                  <Route path="auth">
-                    <Route element={<AuthPage />}>
-                      <Route path="login" element={<Login />} />
-                      <Route path="register" element={<p>register</p>} />
+                    <Route path="auth">
+                      <Route element={<AuthPage />}>
+                        <Route path="login" element={<Login />} />
+                        <Route path="register" element={<p>register</p>} />
+                      </Route>
                     </Route>
                   </Route>
                 </Route>
