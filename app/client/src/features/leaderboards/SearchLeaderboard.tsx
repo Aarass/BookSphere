@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Genre } from "@interfaces/genre";
-import { Glasses, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { GenreAutocomplete } from "../genres/GenreAutocomplete";
@@ -91,7 +91,6 @@ export function SearchLeaderboard() {
           <Leaderboard
             criteria={criteria}
             genreId={genre?.id ?? "global"}
-            scoreIcon={<Glasses />}
             setRefetchFunction={(fn) => (refetch.current = fn)}
           />
         </div>

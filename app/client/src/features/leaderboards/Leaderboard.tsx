@@ -1,4 +1,4 @@
-import { Hash } from "lucide-react";
+import { Glasses, Hash, Sparkles } from "lucide-react";
 import { ReactNode, useEffect } from "react";
 import { NavLink } from "react-router";
 import { useGetLeaderboardQuery } from "./leaderboardsApi";
@@ -7,7 +7,6 @@ type ExtractObject<T> = T extends object ? T : never;
 type Args = ExtractObject<Parameters<typeof useGetLeaderboardQuery>[0]>;
 
 export function Leaderboard({
-  scoreIcon,
   criteria,
   genreId,
   setRefetchFunction,
@@ -50,8 +49,10 @@ export function Leaderboard({
           <NavLink to={`/books/${book.isbn}`} className="mx-2 underline">
             {book.title}
           </NavLink>
-          {scoreIcon}
-          <p>{criteria === "readers" ? book.score : book.score.toFixed(2)}</p>
+          {criteria === "readers" ? <Glasses /> : <Sparkles />}
+          <p className="ml-2">
+            {criteria === "readers" ? book.score : book.score.toFixed(1)}
+          </p>
         </div>
       ))}
     </div>

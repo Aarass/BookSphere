@@ -1,9 +1,8 @@
+import { ReadingStatus } from "@interfaces/book";
 import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
-import { statsRepository } from "../repositories/statsRepository";
-import { ReadingStatus } from "@interfaces/book";
 import { leaderboardRepository } from "../repositories/leaderboardRepository";
-import { Genre } from "@interfaces/genre";
+import { statsRepository } from "../repositories/statsRepository";
 
 async function createBook(dto: CreateBookDto) {
   const book = await bookRepository.createBook(
@@ -14,6 +13,10 @@ async function createBook(dto: CreateBookDto) {
     dto.authorId,
     dto.genreIds,
   );
+
+  setImmediate(async () => {
+    leaderboardRepository.onBookCreated(book);
+  });
 
   return book;
 }
@@ -31,6 +34,7 @@ async function deleteBook(isbn: string) {
 
   setImmediate(async () => {
     statsRepository.onBookDeleted(deletedBook);
+    leaderboardRepository.onBookDeleted(deletedBook);
   });
 
   return deletedBook;

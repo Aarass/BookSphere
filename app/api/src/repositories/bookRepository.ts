@@ -27,7 +27,7 @@ class BookRepository {
           UNWIND $genreIds as genreId
             MATCH (g:Genre {id: genreId})
             CREATE (b)-[:IS_OF_GENRE]->(g)
-          RETURN ${toRawBook("b")}, {id: a.id, fullName: a.fullName} as author, collect(genreId) as genreIds
+          RETURN ${toBook("b", "a")}
           `,
           {
             isbn,

@@ -1,8 +1,60 @@
+import { Book } from "@interfaces/book";
 import { getSession } from "../drivers/neo4j";
 import { getClient } from "../drivers/redis";
 import { getRatingsCountKey, getRatingsSumKey } from "./statsRepository";
 
 class LeaderboardRepository {
+  async onBookCreated(book: Book) {
+    let redis;
+    try {
+      redis = getClient();
+      const multi = redis.multi();
+
+      for (const genre of book.genres) {
+        multi.zAdd(getLbKey("rating", genre.id), {
+          score: 0,
+          value: book.isbn,
+        });
+        multi.zAdd(getLbKey("readers", genre.id), {
+          score: 0,
+          value: book.isbn,
+        });
+      }
+
+      multi.zAdd(getLbKey("rating", "global"), {
+        score: 0,
+        value: book.isbn,
+      });
+      multi.zAdd(getLbKey("readers", "global"), {
+        score: 0,
+        value: book.isbn,
+      });
+
+      await multi.execAsPipeline();
+    } finally {
+      redis?.quit();
+    }
+  }
+
+  async onBookDeleted(book: Book) {
+    let redis;
+    try {
+      redis = getClient();
+      const multi = redis.multi();
+
+      for (const genre of book.genres) {
+        multi.zRem(getLbKey("rating", genre.id), book.isbn);
+        multi.zRem(getLbKey("readers", genre.id), book.isbn);
+      }
+      multi.zRem(getLbKey("rating", "global"), book.isbn);
+      multi.zRem(getLbKey("readers", "global"), book.isbn);
+
+      await multi.execAsPipeline();
+    } finally {
+      redis?.quit();
+    }
+  }
+
   async getBookIdsFromLeaderboard(
     criteria: "rating" | "readers",
     genre: string,
@@ -25,8 +77,6 @@ class LeaderboardRepository {
           },
         },
       );
-
-      console.log(criteria, genre, result);
 
       return result;
     } finally {

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Leaderboard } from "@/features/leaderboards/Leaderboard";
 import { SearchLeaderboard } from "@/features/leaderboards/SearchLeaderboard";
-import { Glasses, RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { RefObject, useRef } from "react";
 
 export function LeaderboardsPage() {
@@ -19,7 +19,6 @@ export function LeaderboardsPage() {
           <Leaderboard
             criteria="rating"
             genreId="global"
-            scoreIcon={<Sparkles className="mr-1" size={20} />}
             setRefetchFunction={(fn) => (refetch1.current = fn)}
           />
         </div>
@@ -32,7 +31,6 @@ export function LeaderboardsPage() {
           <Leaderboard
             criteria="readers"
             genreId="global"
-            scoreIcon={<Glasses className="mr-1" size={20} />}
             setRefetchFunction={(fn) => (refetch2.current = fn)}
           />
         </div>

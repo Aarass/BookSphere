@@ -8,16 +8,9 @@ class StatsRepository {
     try {
       const multi = redis.multi();
       multi.del(getCommentsCountKey(book.isbn));
+      multi.del(getReadersCountKey(book.isbn));
       multi.del(getRatingsCountKey(book.isbn));
       multi.del(getRatingsSumKey(book.isbn));
-
-      for (const genre of book.genres) {
-        multi.zRem(getLbKey("rating", genre.id), book.isbn);
-        multi.zRem(getLbKey("readers", genre.id), book.isbn);
-      }
-      multi.zRem(getLbKey("rating", "global"), book.isbn);
-      multi.zRem(getLbKey("readers", "global"), book.isbn);
-
       await multi.execAsPipeline();
     } finally {
       redis.quit();
