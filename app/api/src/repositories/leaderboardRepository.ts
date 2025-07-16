@@ -12,18 +12,48 @@ class LeaderboardRepository {
     const redis = getClient();
 
     try {
-      const result = redis.zRangeWithScores(lbKey, cursor ?? "inf", "-inf", {
-        REV: true,
-        BY: "SCORE",
-        LIMIT: {
-          offset: 0,
-          count: 10,
+      const result = await redis.zRangeWithScores(
+        lbKey,
+        cursor ?? "inf",
+        "-inf",
+        {
+          REV: true,
+          BY: "SCORE",
+          LIMIT: {
+            offset: 0,
+            count: 10,
+          },
         },
-      });
+      );
+
+      console.log(criteria, genre, result);
 
       return result;
     } finally {
       await redis.quit();
+    }
+  }
+
+  async updateReadersLeaderboards(
+    isbn: string,
+    genreIds: string[],
+    status: boolean,
+  ) {
+    const diff = status === true ? 1 : -1;
+
+    let redis;
+    try {
+      redis = getClient();
+
+      const multi = redis.multi();
+      for (const genreId of genreIds) {
+        multi.ZINCRBY(getLbKey("readers", genreId), diff, isbn);
+      }
+      multi.ZINCRBY(getLbKey("readers", "global"), diff, isbn);
+
+      await multi.exec();
+    } finally {
+      await redis?.quit();
     }
   }
 

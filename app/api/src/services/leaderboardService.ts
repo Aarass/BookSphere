@@ -5,12 +5,12 @@ import { bookRepository } from "../repositories/bookRepository";
 async function getBooksFromLeaderboard(
   criteria: "rating" | "readers",
   genreId: string,
-  dto: ReadLeaderboardDto
+  dto: ReadLeaderboardDto,
 ) {
   const scoresAndISBNs = await leaderboardRepository.getBookIdsFromLeaderboard(
     criteria,
     genreId,
-    dto.cursor
+    dto.cursor,
   );
 
   if (scoresAndISBNs.length === 0) {

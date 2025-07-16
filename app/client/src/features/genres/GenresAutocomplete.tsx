@@ -65,7 +65,7 @@ export function GenresAutocomplete(props: {
             >
               <div className="flex w-full justify-between items-center">
                 <span
-                  className={`font-[500] text-[1.05em] flex-1 overflow-ellipsis overflow-hidden whitespace-nowrap text-left ${value.length ? "" : "opacity-60"}`}
+                  className={`flex-1 overflow-ellipsis overflow-hidden whitespace-nowrap text-left ${value.length ? "" : "opacity-60"}`}
                 >
                   {value.length
                     ? value.map((genre: Genre) => genre.name).join(", ")

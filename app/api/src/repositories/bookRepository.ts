@@ -162,25 +162,33 @@ class BookRepository {
 
   async setReadingStatus(isbn: string, userId: string, status: boolean) {
     const neo4j = getSession();
-    let hasChanged;
     try {
       const result = await neo4j.run(
         `MATCH (b:Book {isbn: $isbn}), (u:User {id: $userId}) ${
           status == true
             ? `CREATE (u)-[:IS_READING {_start: $userId, _end: $isbn}]->(b)`
             : `MATCH (u)-[r:IS_READING]->(b) DELETE r`
-        }`,
+        } RETURN ${toGenreIds("b")}`,
         { isbn, userId },
       );
 
       const updates = result.summary.counters.updates();
-      hasChanged =
+      const hasChanged =
         updates.relationshipsDeleted > 0 || updates.relationshipsCreated > 0;
+
+      if (result.records.length != 1) {
+        throw "Couldn't delete rating";
+      }
+
+      const record = result.records[0].toObject();
+
+      return {
+        hasChanged,
+        genreIds: record.ids,
+      };
     } finally {
       await neo4j.close();
     }
-
-    return { hasChanged };
   }
 
   async createComment(isbn: string, userId: string, content: string) {

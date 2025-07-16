@@ -62,7 +62,7 @@ export function Autocomplete<T extends { id: string }>(
             >
               <div className="w-full flex justify-between items-center">
                 <span
-                  className={`font-[500] text-[1.05em] flex-1 overflow-ellipsis overflow-hidden whitespace-nowrap text-left ${value ? "" : "opacity-60"}`}
+                  className={`flex-1 overflow-ellipsis overflow-hidden whitespace-nowrap text-left ${value ? "" : "opacity-60"}`}
                 >
                   {value ? props.entryDisplayFn(value) : props.placeholder}
                 </span>

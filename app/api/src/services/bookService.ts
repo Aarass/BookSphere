@@ -2,6 +2,8 @@ import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
 import { statsRepository } from "../repositories/statsRepository";
 import { ReadingStatus } from "@interfaces/book";
+import { leaderboardRepository } from "../repositories/leaderboardRepository";
+import { Genre } from "@interfaces/genre";
 
 async function createBook(dto: CreateBookDto) {
   const book = await bookRepository.createBook(
@@ -46,7 +48,7 @@ async function setReadingStatus(
   userId: string,
   dto: SetReadingStatus,
 ) {
-  const { hasChanged } = await bookRepository.setReadingStatus(
+  const { hasChanged, genreIds } = await bookRepository.setReadingStatus(
     isbn,
     userId,
     dto.status,
@@ -55,6 +57,11 @@ async function setReadingStatus(
   if (hasChanged) {
     setImmediate(async () => {
       await statsRepository.onReadingStatusChanged(isbn, dto.status);
+      await leaderboardRepository.updateReadersLeaderboards(
+        isbn,
+        genreIds,
+        dto.status,
+      );
     });
   }
 }

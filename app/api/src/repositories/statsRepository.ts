@@ -78,10 +78,13 @@ class StatsRepository {
   }
 
   async onReadingStatusChanged(isbn: string, status: boolean) {
-    const gReaders = getLbKey("readers", "global");
     const redis = getClient();
     try {
-      await redis.ZINCRBY(gReaders, status == true ? 1 : -1, isbn);
+      if (status) {
+        await redis.incr(getReadersCountKey(isbn));
+      } else {
+        await redis.decr(getReadersCountKey(isbn));
+      }
     } finally {
       await redis.quit();
     }
@@ -97,7 +100,7 @@ class StatsRepository {
           .get(getRatingsSumKey(isbn))
           .get(getRatingsCountKey(isbn))
           .get(getCommentsCountKey(isbn))
-          .zScore(getLbKey("readers", "global"), isbn)
+          .get(getReadersCountKey(isbn))
           .execAsPipeline()
       ).map((s: any) => (s ? parseInt(s) : 0));
 
@@ -111,5 +114,6 @@ class StatsRepository {
 export const getRatingsSumKey = (isbn: string) => `ratings_sum:${isbn}`;
 export const getRatingsCountKey = (isbn: string) => `ratings_count:${isbn}`;
 export const getCommentsCountKey = (isbn: string) => `comments_count:${isbn}`;
+export const getReadersCountKey = (isbn: string) => `readers_count:${isbn}`;
 
 export const statsRepository = new StatsRepository();

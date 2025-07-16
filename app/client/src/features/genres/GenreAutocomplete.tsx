@@ -1,10 +1,10 @@
 import { Autocomplete } from "@/components/ui/custom/autocomplete";
-import { Control, FieldValues } from "react-hook-form";
+import { Control } from "react-hook-form";
 import { useGetGenresQuery } from "./genresApi";
 
 export function GenreAutocomplete(props: {
   name: string;
-  control: Control<FieldValues, any, FieldValues>;
+  control: Control<any, any, any>;
 }) {
   const { data: genres } = useGetGenresQuery();
 

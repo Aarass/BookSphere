@@ -7,69 +7,92 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
-import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { GenreAutocomplete } from "../genres/GenreAutocomplete";
 import { Genre } from "@interfaces/genre";
-import { useGetLeaderboardQuery } from "./leaderboardsApi";
+import { Glasses, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { GenreAutocomplete } from "../genres/GenreAutocomplete";
+import { Leaderboard } from "./Leaderboard";
 
 export function SearchLeaderboard() {
-  const { register, handleSubmit, watch, control } = useForm();
+  const [ready, setReady] = useState(false);
 
-  // useEffect(() => {
-  //   const subscription = watch((value, { name, type }) => {
-  //     submit(value);
-  //   });
-  //
-  //   return () => subscription.unsubscribe();
-  // }, [watch]);
-  const tmp = useGetLeaderboardQuery();
+  const { handleSubmit, control } = useForm({
+    defaultValues: {
+      criteria: "rating" as "rating" | "readers",
+      genre: null as Genre | null,
+    },
+  });
 
-  function submit(data: any) {
-    const criteria: "rating" | "readers" = data["criteria"];
-    const genre: Genre["id"] | "global" = data["genre"]?.id ?? "global";
+  //--------------------------------------------------------
+  const [firstTime, setFirstTime] = useState(true);
+  const criteria = useWatch({ name: "criteria", control });
+  const genre = useWatch({ name: "genre", control });
+  useEffect(() => {
+    if (firstTime) {
+      setFirstTime(false);
+      return;
+    }
 
-    console.log(criteria, genre);
+    setReady(true);
+  }, [criteria, genre?.id]);
+  //------------------------
+
+  function submit() {
+    setReady(true);
+    // const criteria: "rating" | "readers" = data["criteria"];
+    // const genre: Genre["id"] | "global" = data["genre"]?.id ?? "global";
+    //
+    // console.log(criteria, genre);
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(submit)}
-      className="grid gap-4 p-4 grid-cols-[1fr_1fr]"
-    >
-      <div className="grid grid-cols-[max-content_max-content_min-content] grid-rows-[min-content_auto] gap-y-1 gap-x-4 items-center">
-        <Label htmlFor="criteria">Criteria</Label>
-        <Label htmlFor="genre">Genre</Label>
-        <div />
+    <div>
+      <form
+        onSubmit={handleSubmit(submit)}
+        className="grid gap-4 p-4 grid-cols-[1fr_1fr]"
+      >
+        <div className="grid grid-cols-[max-content_max-content_min-content] grid-rows-[min-content_auto] gap-y-1 gap-x-4 items-center">
+          <Label htmlFor="criteria">Criteria</Label>
+          <Label htmlFor="genre">Genre</Label>
+          <div />
 
-        <Controller
-          defaultValue="rating"
-          control={control}
-          name="criteria"
-          rules={{
-            required: true,
-          }}
-          render={({ field }) => (
-            <Select defaultValue={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-[180px]" id="criteria">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rating">Best rated</SelectItem>
-                <SelectItem value="readers">Most popular</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <div className="w-[180px]">
-          <GenreAutocomplete control={control} name="genre" />
+          <Controller
+            control={control}
+            name="criteria"
+            rules={{
+              required: true,
+            }}
+            render={({ field }) => (
+              <Select defaultValue={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-[180px]" id="criteria">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rating">Best rated</SelectItem>
+                  <SelectItem value="readers">Most popular</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          <div className="w-[180px]">
+            <GenreAutocomplete control={control} name="genre" />
+          </div>
+
+          <Button variant="ghost" size="sm" type="submit">
+            <Search />
+          </Button>
         </div>
-
-        <Button variant="ghost" size="sm" type="submit">
-          <Search />
-        </Button>
-      </div>
-    </form>
+      </form>
+      {!ready ? null : (
+        <div>
+          <Leaderboard
+            criteria={criteria}
+            genreId={genre?.id ?? "global"}
+            scoreIcon={<Glasses />}
+          />
+        </div>
+      )}
+    </div>
   );
 }
