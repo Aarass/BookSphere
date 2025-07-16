@@ -63,13 +63,15 @@ export function GenresAutocomplete(props: {
               aria-expanded={open}
               className="justify-between"
             >
-              <div className="flex w-full">
-                <p className="grow max-w-[20ch] truncate whitespace-nowrap text-left">
+              <div className="flex w-full justify-between items-center">
+                <span
+                  className={`font-[500] text-[1.05em] flex-1 overflow-ellipsis overflow-hidden whitespace-nowrap text-left ${value.length ? "" : "opacity-60"}`}
+                >
                   {value.length
                     ? value.map((genre: Genre) => genre.name).join(", ")
                     : "Select Genres..."}
-                </p>
-                <ChevronsUpDown className="ml-auto opacity-50" />
+                </span>
+                <ChevronsUpDown className="opacity-50 shrink" />
               </div>
             </Button>
           </PopoverTrigger>
