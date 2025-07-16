@@ -1,5 +1,5 @@
 import { Hash } from "lucide-react";
-import { ReactNode, RefObject, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { NavLink } from "react-router";
 import { useGetLeaderboardQuery } from "./leaderboardsApi";
 
@@ -51,7 +51,7 @@ export function Leaderboard({
             {book.title}
           </NavLink>
           {scoreIcon}
-          <p>{book.score.toFixed(2)}</p>
+          <p>{criteria === "readers" ? book.score : book.score.toFixed(2)}</p>
         </div>
       ))}
     </div>

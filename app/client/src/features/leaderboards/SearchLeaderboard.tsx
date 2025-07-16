@@ -9,12 +9,13 @@ import {
 } from "@/components/ui/select";
 import { Genre } from "@interfaces/genre";
 import { Glasses, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { GenreAutocomplete } from "../genres/GenreAutocomplete";
 import { Leaderboard } from "./Leaderboard";
 
 export function SearchLeaderboard() {
+  const refetch = useRef<Function>(null);
   const [ready, setReady] = useState(false);
 
   const { handleSubmit, control } = useForm({
@@ -38,18 +39,10 @@ export function SearchLeaderboard() {
   }, [criteria, genre?.id]);
   //------------------------
 
-  function submit() {
-    setReady(true);
-    // const criteria: "rating" | "readers" = data["criteria"];
-    // const genre: Genre["id"] | "global" = data["genre"]?.id ?? "global";
-    //
-    // console.log(criteria, genre);
-  }
-
   return (
     <div>
       <form
-        onSubmit={handleSubmit(submit)}
+        onSubmit={handleSubmit(() => setReady(true))}
         className="grid gap-4 p-4 grid-cols-[1fr_1fr]"
       >
         <div className="grid grid-cols-[max-content_max-content_min-content] grid-rows-[min-content_auto] gap-y-1 gap-x-4 items-center">
@@ -79,7 +72,16 @@ export function SearchLeaderboard() {
             <GenreAutocomplete control={control} name="genre" />
           </div>
 
-          <Button variant="ghost" size="sm" type="submit">
+          <Button
+            variant="ghost"
+            size="sm"
+            type="submit"
+            onClick={() => {
+              if (refetch.current) {
+                refetch.current();
+              }
+            }}
+          >
             <Search />
           </Button>
         </div>
@@ -90,6 +92,7 @@ export function SearchLeaderboard() {
             criteria={criteria}
             genreId={genre?.id ?? "global"}
             scoreIcon={<Glasses />}
+            setRefetchFunction={(fn) => (refetch.current = fn)}
           />
         </div>
       )}
