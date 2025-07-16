@@ -16,15 +16,13 @@ router.get("/leaderboards/:criteria/:genreId", async (req, res, next) => {
     const books = await leaderboardService.getBooksFromLeaderboard(
       criteria,
       genreId,
-      req.body
+      req.body,
     );
     res.status(200).send(books);
   } catch (err) {
     console.error(err);
     return next(createHttpError(500, `Something went wrong`));
   }
-
-  //
 });
 
 export default router;

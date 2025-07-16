@@ -65,12 +65,10 @@ export function RateBook(props: { isbn: Book["isbn"] }) {
 
     stars.push(
       <Star
-        size={18}
-        className="cursor-pointer"
         key={i}
-        fill={undefined}
+        size={18}
+        className={`cursor-pointer ${fill ? "fill-foreground" : ""}`}
         opacity={isIdle ? 1 : 0.5}
-        fillOpacity={fill}
         onClick={() => {
           onChange(i);
         }}

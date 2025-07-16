@@ -361,7 +361,7 @@ class BookRepository {
     const record = result.records[0].toObject();
 
     return {
-      genreIds: record.genreIds,
+      genreIds: record.ids,
       value: record.value,
     };
   }
@@ -394,7 +394,7 @@ class BookRepository {
     const record = result.records[0].toObject();
 
     return {
-      genreIds: record.genreIds,
+      genreIds: record.ids,
       oldValue: record.oldValue,
     };
   }
@@ -475,7 +475,7 @@ function toBook(bookVar: string, authorVar: string) {
 }
 
 function toGenreIds(bookVar: string) {
-  return `COLLECT{MATCH (b)-[:IS_OF_GENRE]->(g:Genre) return g.id} as ids`;
+  return `COLLECT{MATCH (${bookVar})-[:IS_OF_GENRE]->(g:Genre) return g.id} as ids`;
 }
 
 function toRawBook(bookVar: string) {

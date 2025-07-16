@@ -6,7 +6,7 @@ class LeaderboardRepository {
   async getBookIdsFromLeaderboard(
     criteria: "rating" | "readers",
     genre: string,
-    cursor: number | undefined
+    cursor: number | undefined,
   ) {
     const lbKey = getLbKey(criteria, genre);
     const redis = getClient();
@@ -64,8 +64,9 @@ class LeaderboardRepository {
       await multi.exec();
 
       // break;
-    } catch {
+    } catch (err) {
       console.log("Watch error");
+      console.log(err);
     }
     // }
 

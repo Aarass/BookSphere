@@ -6,12 +6,12 @@ import { statsRepository } from "../repositories/statsRepository";
 async function createRating(
   isbn: string,
   userId: string,
-  dto: CreateRatingDto
+  dto: CreateRatingDto,
 ) {
   const { ids: genreIds } = await bookRepository.createRating(
     isbn,
     userId,
-    dto.value
+    dto.value,
   );
 
   setImmediate(async () => {
@@ -23,12 +23,12 @@ async function createRating(
 async function updateRating(
   isbn: string,
   userId: string,
-  dto: UpdateRatingDto
+  dto: UpdateRatingDto,
 ) {
   const { genreIds, oldValue } = await bookRepository.updateRating(
     isbn,
     userId,
-    dto.value
+    dto.value,
   );
 
   setImmediate(async () => {
