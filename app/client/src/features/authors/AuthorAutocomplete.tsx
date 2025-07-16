@@ -19,6 +19,7 @@ export function AuthorAutocomplete(props: {
       entries={authors}
       entryDisplayFn={(author) => author.fullName}
       placeholder="Select Author..."
+      required
       errorMessage="Author is required"
     />
   );

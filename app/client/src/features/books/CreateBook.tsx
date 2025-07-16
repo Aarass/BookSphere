@@ -17,7 +17,7 @@ import { Genre } from "@interfaces/genre";
 import { AlertCircleIcon, ImagePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { AuthorAutocomplete } from "../authors/AuthorAutocomplete";
-import { GenreAutocomplete } from "../genres/GenreAutocomplete";
+import { GenresAutocomplete } from "../genres/GenresAutocomplete";
 import { useCreateBookMutation } from "./booksApi";
 
 export function CreateBook() {
@@ -160,7 +160,7 @@ export function CreateBook() {
 
           <>
             <Label htmlFor="genres">Genres</Label>
-            <GenreAutocomplete control={control} name="genres" />
+            <GenresAutocomplete control={control} name="genres" />
           </>
 
           <>

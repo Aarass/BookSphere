@@ -17,23 +17,28 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { Control, Controller, FieldValues } from "react-hook-form";
 
-export function Autocomplete<T extends { id: string }>(props: {
-  name: string;
-  control: Control<FieldValues, any, FieldValues>;
-  entries: T[];
-  entryDisplayFn: (_: T) => string;
-  placeholder: string;
-  errorMessage: string;
-}) {
+export function Autocomplete<T extends { id: string }>(
+  props: {
+    name: string;
+    control: Control<FieldValues, any, FieldValues>;
+    entries: T[];
+    entryDisplayFn: (_: T) => string;
+    placeholder: string;
+  } & ({ required: true; errorMessage: string } | { required?: undefined }),
+) {
   const [open, setOpen] = useState(false);
 
   return (
     <Controller
       control={props.control}
       name={props.name}
-      rules={{
-        required: { value: true, message: props.errorMessage },
-      }}
+      rules={
+        props.required
+          ? {
+              required: { value: true, message: props.errorMessage },
+            }
+          : {}
+      }
       render={({ field: { onChange, onBlur, value } }) => (
         <Popover
           open={open}
@@ -48,15 +53,17 @@ export function Autocomplete<T extends { id: string }>(props: {
             // console.log(value, ref);
             return null;
           })()}
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild className="w-full">
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="justify-between"
+              className="max-w-full font-normal justify-between"
             >
-              {value ? props.entryDisplayFn(value) : props.placeholder}
-              <ChevronsUpDown className="opacity-50" />
+              <span className="flex-1 text-left">
+                {value ? props.entryDisplayFn(value) : props.placeholder}
+              </span>
+              <ChevronsUpDown className="opacity-50 shrink" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="p-0">
