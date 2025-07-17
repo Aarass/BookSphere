@@ -1,3 +1,4 @@
+import { api } from "@/app/store";
 import { createAppSlice } from "../../app/createAppSlice";
 import {
   createLoginRequest,
@@ -56,12 +57,14 @@ export const authSlice = createAppSlice({
       },
     ),
     logout: create.asyncThunk(
-      async () => {
+      async (_, thunkApi) => {
         const res = await createLogoutRequest();
 
         if (!res.ok) {
           throw new Error(`Couldn't log you in`);
         }
+
+        thunkApi.dispatch(api.util.resetApiState());
       },
       {
         fulfilled: (state) => {
