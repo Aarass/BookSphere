@@ -12,7 +12,6 @@ import {
   useGetBookReadingStatusQuery,
   useSetBookReadingStatusMutation,
 } from "./booksApi";
-import { useState } from "react";
 
 export function MyReadingStatus(props: { isbn: Book["isbn"] }) {
   const { data, isLoading, isFetching } = useGetBookReadingStatusQuery(
@@ -23,23 +22,23 @@ export function MyReadingStatus(props: { isbn: Book["isbn"] }) {
     useSetBookReadingStatusMutation();
 
   const disabled = isLoading || isFetching || setting;
-  const pressed = data ? data.status : false;
 
-  const [read, setRead] = useState(false);
+  const reading = data ? data.status === "reading" : false;
+  const completed = data ? data.status === "completed" : false;
 
   return (
     <>
       <Tooltip delayDuration={700}>
-        <TooltipTrigger asChild hidden={read}>
+        <TooltipTrigger asChild hidden={completed}>
           <Toggle
-            className={`cursor-pointer ${pressed ? "bg-secondary" : ""}`}
-            pressed={pressed}
+            className={`cursor-pointer ${reading ? "bg-secondary" : ""}`}
+            pressed={reading}
             disabled={disabled}
             onPressedChange={(newStatus) => {
               setReadingStatus({
                 isbn: props.isbn,
                 dto: {
-                  status: newStatus,
+                  status: newStatus === true ? "reading" : "null",
                 } satisfies SetReadingStatus,
               });
             }}
@@ -51,20 +50,28 @@ export function MyReadingStatus(props: { isbn: Book["isbn"] }) {
           <p>Tell people that you are reading this book</p>
         </TooltipContent>
       </Tooltip>
-      <Collapsible open={pressed}>
+      <Collapsible open={reading || completed}>
         <CollapsibleContent>
           <Tooltip delayDuration={700}>
             <TooltipTrigger asChild>
               <Toggle
-                className={`cursor-pointer ${read ? "bg-secondary" : ""}`}
-                pressed={read}
-                onPressedChange={setRead}
+                disabled={disabled}
+                className={`cursor-pointer ${completed ? "bg-secondary" : ""}`}
+                pressed={completed}
+                onPressedChange={(newStatus) => {
+                  setReadingStatus({
+                    isbn: props.isbn,
+                    dto: {
+                      status: newStatus === true ? "completed" : "null",
+                    } satisfies SetReadingStatus,
+                  });
+                }}
               >
                 <BookCheck />
               </Toggle>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Mark this book as read</p>
+              <p>{completed ? "Unmark" : "Marj"} this book as read</p>
             </TooltipContent>
           </Tooltip>
         </CollapsibleContent>

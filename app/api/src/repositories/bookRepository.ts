@@ -157,49 +157,74 @@ class BookRepository {
     try {
       const result = await query(
         session,
-        `RETURN EXISTS {MATCH (u:User {id: $userId})-[r:IS_READING]->(b:Book {isbn: $isbn})} AS isReading`,
+        `MATCH (u:User {id: $userId})-[r:IS_READING]->(b:Book {isbn: $isbn}) RETURN r.status as status`,
         {
           userId,
           isbn,
         },
       );
 
+      if (result.length === 0) {
+        return {
+          status: "null",
+        };
+      }
+
       if (result.length !== 1) {
         throw "Internal error";
       }
 
       return {
-        status: result[0]["isReading"],
-      } satisfies ReadingStatus;
+        status: result[0]["status"],
+      };
     } finally {
       await session.close();
     }
   }
 
-  async setReadingStatus(isbn: string, userId: string, status: boolean) {
+  async setReadingStatus(
+    isbn: string,
+    userId: string,
+    status: ReadingStatus["status"],
+  ) {
     const neo4j = getSession();
+    let result;
     try {
-      const result = await neo4j.run(
-        `MATCH (b:Book {isbn: $isbn}), (u:User {id: $userId}) ${
-          status == true
-            ? `CREATE (u)-[:IS_READING {_start: $userId, _end: $isbn}]->(b)`
-            : `MATCH (u)-[r:IS_READING]->(b) DELETE r`
-        } RETURN ${toGenreIds("b")}`,
-        { isbn, userId },
-      );
-
-      const updates = result.summary.counters.updates();
-      const hasChanged =
-        updates.relationshipsDeleted > 0 || updates.relationshipsCreated > 0;
+      switch (status) {
+        case "null":
+          result = await neo4j.run(
+            `MATCH (:User {id: $userId})-[r:IS_READING]->(b:Book {isbn: $isbn})
+              WITH r, b, r.status as oldStatus
+              DELETE r 
+              RETURN ${toGenreIds("b")}, oldStatus`,
+            { isbn, userId },
+          );
+          break;
+        case "reading":
+        case "completed":
+          result = await neo4j.run(
+            `OPTIONAL MATCH (:User {id: $userId})-[r:IS_READING]->(:Book {isbn: $isbn})
+              WITH r.status as oldStatus
+              MATCH (u: User {id: $userId}), (b:Book {isbn: $isbn})
+              MERGE (u)-[r:IS_READING]->(b)
+              SET r.status = $status
+              RETURN ${toGenreIds("b")}, oldStatus`,
+            { isbn, userId, status },
+          );
+          break;
+        default:
+          status satisfies never;
+          throw new Error("Developer errror");
+      }
 
       if (result.records.length != 1) {
-        throw "Couldn't delete rating";
+        throw "Couldn't update reading status";
       }
 
       const record = result.records[0].toObject();
 
       return {
-        hasChanged,
+        previousValue: record.oldStatus as ReadingStatus["status"],
         genreIds: record.ids,
       };
     } finally {

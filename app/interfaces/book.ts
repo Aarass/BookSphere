@@ -25,5 +25,5 @@ export interface BookStats {
 }
 
 export interface ReadingStatus {
-  status: boolean;
+  status: "null" | "reading" | "completed";
 }

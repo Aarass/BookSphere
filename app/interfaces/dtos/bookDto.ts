@@ -1,3 +1,5 @@
+import { ReadingStatus } from "@interfaces/book";
+
 export interface CreateBookDto {
   isbn: string;
   title: string;
@@ -24,9 +26,7 @@ export function isValidCreateBookDto(
   return true;
 }
 
-export interface SetReadingStatus {
-  status: boolean;
-}
+export type SetReadingStatus = ReadingStatus;
 
 export function isValidSetReadingStatus(
   dto: Partial<SetReadingStatus>,
@@ -34,6 +34,12 @@ export function isValidSetReadingStatus(
   if (dto.status === undefined) {
     return false;
   }
+  if (
+    dto.status !== "null" &&
+    dto.status !== "reading" &&
+    dto.status !== "completed"
+  )
+    return false;
   return true;
 }
 
