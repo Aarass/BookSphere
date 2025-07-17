@@ -14,10 +14,10 @@ export function AllRooms({ club }: { club: BookClub }) {
     <>
       <Separator />
       {rooms.map((room) => (
-        <>
-          <RoomDisplay key={room.id} room={room} club={club} />
+        <div key={room.id}>
+          <RoomDisplay room={room} club={club} />
           <Separator />
-        </>
+        </div>
       ))}
     </>
   );

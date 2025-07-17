@@ -107,13 +107,13 @@ export function useSendMessage({
       withCredentials: true,
     });
 
-    socket.current.on("connect", () => {
-      console.log("Connected");
-    });
-
-    socket.current.on("disconnect", () => {
-      console.log("Disconnected");
-    });
+    // socket.current.on("connect", () => {
+    //   console.log("Connected");
+    // });
+    //
+    // socket.current.on("disconnect", () => {
+    //   console.log("Disconnected");
+    // });
 
     return () => {
       socket.current?.disconnect();

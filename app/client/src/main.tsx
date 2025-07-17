@@ -4,6 +4,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter, Link, Outlet, Route, Routes } from "react-router";
+import { useAppSelector } from "./app/hooks";
 import { store } from "./app/store";
 import { ModeToggle } from "./components/ui/custom/themeToggle";
 import {
@@ -19,20 +20,14 @@ import { Login } from "./features/auth/login/LoginComponent";
 import { Book } from "./features/books/Book";
 import { BookList } from "./features/books/BookList";
 import { CreateBook } from "./features/books/CreateBook";
-import { AllBookClubs } from "./features/clubs/AllBookClubs";
-import { JoinedBookClubs } from "./features/clubs/JoinedBookClubs";
-import { Room } from "./features/clubs/rooms/Room";
 import "./index.css";
 import { AuthPage } from "./pages/AuthPage";
 import { BookClubPage } from "./pages/BookClubPage";
-import { HomePage } from "./pages/HomePage";
-import { MustBeLoggedInGuard } from "./routing/Guard";
-import { useAppSelector } from "./app/hooks";
-import { LandPage } from "./pages/LandPage";
-import { LeaderboardsPage } from "./pages/LeaderboardsPage";
-import { ProfilePage } from "./pages/ProfilePage";
-import { Separator } from "@radix-ui/react-dropdown-menu";
 import { ClubsPage } from "./pages/ClubsPage";
+import { HomePage } from "./pages/HomePage";
+import { LandPage } from "./pages/LandPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { MustBeLoggedInGuard } from "./routing/Guard";
 
 store.dispatch(tryRestoreSession());
 
@@ -56,10 +51,6 @@ if (container) {
                       <Route index element={<BookList />} />
                       <Route path=":isbn" element={<Book />} />
                       <Route path="create" element={<CreateBook />} />
-                    </Route>
-
-                    <Route path="leaderboards">
-                      <Route index element={<LeaderboardsPage />} />
                     </Route>
 
                     <Route path="clubs">
@@ -129,15 +120,6 @@ function NavBar() {
                 className={navigationMenuTriggerStyle()}
               >
                 <Link to={"/books"}>Books</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                asChild
-                className={navigationMenuTriggerStyle()}
-              >
-                <Link to={"/leaderboards"}>Leaderboards</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 

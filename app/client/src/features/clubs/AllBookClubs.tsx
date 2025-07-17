@@ -17,12 +17,12 @@ export function AllBookClubs() {
     <div className="flex flex-col gap-2">
       <Separator />
       {bookClubs.map((club) => (
-        <>
+        <div key={club.id}>
           <div className="p-4">
             <BookClubDisplay club={club} />
           </div>
           <Separator />
-        </>
+        </div>
       ))}
     </div>
   );

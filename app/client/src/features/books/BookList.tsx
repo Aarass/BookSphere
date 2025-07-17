@@ -27,8 +27,8 @@ export function BookList() {
         </Link>
       </Button>
       {books.map((book) => (
-        <div className="h-52">
-          <SmallBookDisplay key={book.isbn} book={book} />
+        <div className="h-52" key={book.isbn}>
+          <SmallBookDisplay book={book} />
         </div>
       ))}
     </div>

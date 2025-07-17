@@ -125,10 +125,11 @@ function MessagesList({ club, room }: { club: BookClub; room: RoomType }) {
     const next = index < array.length - 1 ? array[index + 1] : null;
 
     if (current.authorId === me.id) {
-      return <MyMessage message={current} />;
+      return <MyMessage message={current} key={current.id} />;
     } else {
       return (
         <ForeignMessage
+          key={current.id}
           message={current}
           last={next === null || next.authorId !== current.authorId}
         />
