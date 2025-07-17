@@ -23,12 +23,12 @@ export function ProfilePage() {
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center gap-4">
-      <div className="flex flex-col items-start">
-        <div className="grid grid-cols-[max-content_max-content] grid-rows-2 items-center gap-x-4 mx-4">
-          <h1 className="text-2xl font-bold text-right">{me.username}</h1>
+      <div className="flex flex-col items-end">
+        <div className="grid grid-cols-[max-content_max-content] grid-rows-2 items-center py-2">
+          <h1 className="text-2xl font-bold text-right m-0">{me.username}</h1>
           <Button
-            variant="ghost"
-            className="row-span-2 cursor-pointer"
+            style={{ backgroundColor: me.color }}
+            className="row-span-2 cursor-pointer h-full m-2 relative z-0 overflow-hidden"
             onClick={async () => {
               const result = await dispatch(logout());
               if (logout.fulfilled.match(result)) {
@@ -36,9 +36,10 @@ export function ProfilePage() {
               }
             }}
           >
-            <LogOut />
+            <div className="absolute inset-0 z-10 bg-white opacity-30"></div>
+            <LogOut className="z-20 " />
           </Button>
-          <h2 className="text-xl opacity-50 text-center">
+          <h2 className="text-xl opacity-50 text-center m-0">
             {me.firstName} {me.lastName}
           </h2>
         </div>

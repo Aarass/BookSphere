@@ -71,7 +71,7 @@ export function MyReadingStatus(props: { isbn: Book["isbn"] }) {
               </Toggle>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{completed ? "Unmark" : "Marj"} this book as read</p>
+              <p>{completed ? "Unmark" : "Mark"} this book as read</p>
             </TooltipContent>
           </Tooltip>
         </CollapsibleContent>

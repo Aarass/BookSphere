@@ -1,4 +1,3 @@
-import { User } from "@interfaces/user";
 import {
   Carousel,
   CarouselContent,
@@ -6,11 +5,12 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useGetCurrentlyReadingBooksQuery } from "./booksApi";
+import { User } from "@interfaces/user";
+import { useGetCompletedBooksQuery } from "./booksApi";
 import { SmallBookDisplay } from "./SmallBookDisplay";
 
 export function ReadBooks({ userId }: { userId: User["id"] }) {
-  const { data: books = [] } = useGetCurrentlyReadingBooksQuery(userId);
+  const { data: books = [] } = useGetCompletedBooksQuery(userId);
 
   return (
     <div>
@@ -28,7 +28,7 @@ export function ReadBooks({ userId }: { userId: User["id"] }) {
             for (let i = books.length; i < 3; i++) {
               fakes.push(
                 <CarouselItem className="basis-1/3 pl-2" key={i}>
-                  <div key={i} className="aspect-(--cover) border"></div>
+                  <div key={i} className="aspect-(--cover) bg-secondary"></div>
                 </CarouselItem>,
               );
             }

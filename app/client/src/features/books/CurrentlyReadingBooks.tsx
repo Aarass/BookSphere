@@ -28,7 +28,7 @@ export function CurrentlyReadingBooks({ userId }: { userId: User["id"] }) {
             for (let i = books.length; i < 3; i++) {
               fakes.push(
                 <CarouselItem className="basis-1/3 pl-2" key={i}>
-                  <div key={i} className="aspect-(--cover) border"></div>
+                  <div key={i} className="aspect-(--cover) bg-secondary"></div>
                 </CarouselItem>,
               );
             }

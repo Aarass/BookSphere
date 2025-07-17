@@ -19,8 +19,12 @@ export const apiWithBooks = api.injectEndpoints({
       },
     }),
     getCurrentlyReadingBooks: builder.query<BookRaw[], User["id"]>({
-      query: (userId) => `/users/${userId}/currently-reading`,
-      providesTags: [{ type: "CurrentlyReadingBook", id: "LIST" }],
+      query: (userId) => `/users/${userId}/books/reading`,
+      providesTags: [{ type: "BookList", id: "READING" }],
+    }),
+    getCompletedBooks: builder.query<BookRaw[], User["id"]>({
+      query: (userId) => `/users/${userId}/books/completed`,
+      providesTags: [{ type: "BookList", id: "COMPLETED" }],
     }),
     createBook: builder.mutation<Book, CreateBookDto>({
       query: (createBookDto) => ({
@@ -73,7 +77,8 @@ export const apiWithBooks = api.injectEndpoints({
         return [
           { type: "BookReadingStatus", id: isbn },
           { type: "BookStats", id: isbn },
-          { type: "CurrentlyReadingBook", id: "LIST" },
+          { type: "BookList", id: "READING" },
+          { type: "BookList", id: "COMPLETED" },
         ];
       },
     }),
@@ -84,6 +89,7 @@ export const {
   useGetBooksQuery,
   useGetBookQuery,
   useGetCurrentlyReadingBooksQuery,
+  useGetCompletedBooksQuery,
   useCreateBookMutation,
   useDeleteBookMutation,
   useGetBookStatsQuery,

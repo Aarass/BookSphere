@@ -30,11 +30,23 @@ router.get("/users/:userId", async (req, res, next) => {
   }
 });
 
-router.get("/users/:userId/currently-reading", async (req, res, next) => {
+router.get("/users/:userId/books/reading", async (req, res, next) => {
   const userId = req.params["userId"];
 
   try {
     const books = await bookService.getCurrentlyReadingBooks(userId);
+    res.status(200).send(books);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.get("/users/:userId/books/completed", async (req, res, next) => {
+  const userId = req.params["userId"];
+
+  try {
+    const books = await bookService.getCompletedBooks(userId);
     res.status(200).send(books);
   } catch (err) {
     console.error(err);

@@ -31,7 +31,11 @@ async function getAllBooks() {
 }
 
 async function getCurrentlyReadingBooks(userId: User["id"]) {
-  return await bookRepository.getCurrentlyReadingBooks(userId);
+  return await bookRepository.getBooksWithReadingStatus(userId, "reading");
+}
+
+async function getCompletedBooks(userId: User["id"]) {
+  return await bookRepository.getBooksWithReadingStatus(userId, "completed");
 }
 
 async function deleteBook(isbn: string) {
@@ -109,6 +113,7 @@ export default {
   getBookByISBN,
   getAllBooks,
   getCurrentlyReadingBooks,
+  getCompletedBooks,
   deleteBook,
   getReadingStatus,
   setReadingStatus,

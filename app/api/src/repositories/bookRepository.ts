@@ -105,14 +105,17 @@ class BookRepository {
     }
   }
 
-  async getCurrentlyReadingBooks(userId: string) {
+  async getBooksWithReadingStatus(
+    userId: string,
+    status: ReadingStatus["status"],
+  ) {
     const session = getSession();
 
     try {
       const result = await query<BookRaw>(
         session,
-        `MATCH (u:User {id: $userId})-[:IS_READING]->(b:Book) RETURN ${toRawBook("b")}`,
-        { userId },
+        `MATCH (u:User {id: $userId})-[:IS_READING {status: $status}]->(b:Book) RETURN ${toRawBook("b")}`,
+        { userId, status },
       );
 
       return result;
