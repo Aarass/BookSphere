@@ -4,12 +4,12 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Book } from "@interfaces/book";
+import { BookRaw } from "@interfaces/book";
 import { Pencil, TrashIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useDeleteBookMutation } from "./booksApi";
 
-export function SmallBookDisplay({ book }: { book: Book }) {
+export function SmallBookDisplay({ book }: { book: BookRaw }) {
   const navigate = useNavigate();
 
   const [deleteBook] = useDeleteBookMutation();

@@ -3,6 +3,7 @@ import createHttpError from "http-errors";
 import { authenticate } from "../middlewares/authenticate";
 import { userRecommendationService } from "../services/userRecommendationService";
 import userService from "../services/userService";
+import bookService from "../services/bookService";
 
 let router = express.Router();
 
@@ -26,6 +27,18 @@ router.get("/users/:userId", async (req, res, next) => {
   } catch (err) {
     console.error(err);
     return next(createHttpError(401, `Login failed`));
+  }
+});
+
+router.get("/users/:userId/currently-reading", async (req, res, next) => {
+  const userId = req.params["userId"];
+
+  try {
+    const books = await bookService.getCurrentlyReadingBooks(userId);
+    res.status(200).send(books);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
   }
 });
 

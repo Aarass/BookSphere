@@ -15,7 +15,7 @@ export function AllBookClubs() {
   return (
     <div className="flex flex-col gap-2">
       {bookClubs.map((club) => (
-        <BookClubDisplay club={club} />
+        <BookClubDisplay club={club} key={club.id} />
       ))}
     </div>
   );

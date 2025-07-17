@@ -1,6 +1,7 @@
 import { api } from "@/app/store";
-import { Book, ReadingStatus } from "@interfaces/book";
+import { Book, BookRaw, ReadingStatus } from "@interfaces/book";
 import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
+import { User } from "@interfaces/user";
 
 export const apiWithBooks = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -16,6 +17,10 @@ export const apiWithBooks = api.injectEndpoints({
       providesTags: (_result, _error, isbn) => {
         return [{ type: "Book", id: isbn }];
       },
+    }),
+    getCurrentlyReadingBooks: builder.query<BookRaw[], User["id"]>({
+      query: (userId) => `/users/${userId}/currently-reading`,
+      providesTags: [{ type: "CurrentlyReadingBook", id: "LIST" }],
     }),
     createBook: builder.mutation<Book, CreateBookDto>({
       query: (createBookDto) => ({
@@ -68,24 +73,17 @@ export const apiWithBooks = api.injectEndpoints({
         return [
           { type: "BookReadingStatus", id: isbn },
           { type: "BookStats", id: isbn },
+          { type: "CurrentlyReadingBook", id: "LIST" },
         ];
       },
     }),
-    // getBookComments: builder.query<Comment[], Book["isbn"]>({
-    //   query: (isbn) => `/books/${isbn}/comments`,
-    //   // providesTags: (result = []) => {
-    //   //   return result.map((comment) => ({
-    //   //     type: "BookComment",
-    //   //     id: `${comment.bookISBN}${comment.authorId}`,
-    //   //   }));
-    //   // },
-    // }),
   }),
 });
 
 export const {
   useGetBooksQuery,
   useGetBookQuery,
+  useGetCurrentlyReadingBooksQuery,
   useCreateBookMutation,
   useDeleteBookMutation,
   useGetBookStatsQuery,

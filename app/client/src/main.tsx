@@ -30,6 +30,7 @@ import { MustBeLoggedInGuard } from "./routing/Guard";
 import { useAppSelector } from "./app/hooks";
 import { LandPage } from "./pages/LandPage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 store.dispatch(tryRestoreSession());
 
@@ -72,7 +73,7 @@ if (container) {
                     </Route>
 
                     <Route path="home" element={<HomePage />} />
-                    <Route path="profile" element={<p>profile</p>} />
+                    <Route path="profile" element={<ProfilePage />} />
                   </Route>
 
                   <Route path="auth">
@@ -156,7 +157,20 @@ function NavBar() {
 
         <div className="grow"></div>
 
-        {isLoggedIn ? null : (
+        {isLoggedIn ? (
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link to={"/profile"}>Profile</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        ) : (
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>

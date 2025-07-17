@@ -3,6 +3,7 @@ import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
 import { leaderboardRepository } from "../repositories/leaderboardRepository";
 import { statsRepository } from "../repositories/statsRepository";
+import { User } from "@interfaces/user";
 
 async function createBook(dto: CreateBookDto) {
   const book = await bookRepository.createBook(
@@ -27,6 +28,10 @@ async function getBookByISBN(isbn: string) {
 
 async function getAllBooks() {
   return await bookRepository.getAll();
+}
+
+async function getCurrentlyReadingBooks(userId: User["id"]) {
+  return await bookRepository.getCurrentlyReadingBooks(userId);
 }
 
 async function deleteBook(isbn: string) {
@@ -78,6 +83,7 @@ export default {
   createBook,
   getBookByISBN,
   getAllBooks,
+  getCurrentlyReadingBooks,
   deleteBook,
   getReadingStatus,
   setReadingStatus,

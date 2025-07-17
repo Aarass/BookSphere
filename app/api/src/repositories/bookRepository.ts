@@ -1,4 +1,4 @@
-import { Book, BookWithScore, ReadingStatus } from "@interfaces/book";
+import { Book, BookRaw, BookWithScore, ReadingStatus } from "@interfaces/book";
 import { getSession, query } from "../drivers/neo4j";
 import { Rating } from "@interfaces/rating";
 import { Comment } from "@interfaces/comment";
@@ -97,6 +97,22 @@ class BookRepository {
         session,
         `MATCH (a:Author)-[:WROTE]->(b:Book) RETURN ${toBook("b", "a")}`,
         {},
+      );
+
+      return result;
+    } finally {
+      await session.close();
+    }
+  }
+
+  async getCurrentlyReadingBooks(userId: string) {
+    const session = getSession();
+
+    try {
+      const result = await query<BookRaw>(
+        session,
+        `MATCH (u:User {id: $userId})-[:IS_READING]->(b:Book) RETURN ${toRawBook("b")}`,
+        { userId },
       );
 
       return result;
