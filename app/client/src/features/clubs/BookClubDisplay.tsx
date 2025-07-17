@@ -17,21 +17,22 @@ export function BookClubDisplay({
   const navigate = useNavigate();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{club.tittle}</CardTitle>
-        <CardDescription>{club.description}</CardDescription>
-        <CardAction>
-          <Button
-            variant="link"
-            onClick={() => {
-              navigate(`/clubs/${club.id}`);
-            }}
-          >
-            Open
-          </Button>
-        </CardAction>
-      </CardHeader>
-    </Card>
+    <div className="grid grid-cols-[1fr_min-content] items-center">
+      <div>
+        <p className="text-xs text-primary opacity-50 mb-1">Jul 17</p>
+        <h1 className="font-bold">{club.tittle}</h1>
+        <h2 className="text-sm">{club.description}</h2>
+        <h3 className="mt-2 text-sm opacity-70">7 rooms</h3>
+      </div>
+
+      <Button
+        variant="link"
+        onClick={() => {
+          navigate(`/clubs/${club.id}`);
+        }}
+      >
+        Open
+      </Button>
+    </div>
   );
 }

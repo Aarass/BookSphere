@@ -31,6 +31,8 @@ import { useAppSelector } from "./app/hooks";
 import { LandPage } from "./pages/LandPage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import { ClubsPage } from "./pages/ClubsPage";
 
 store.dispatch(tryRestoreSession());
 
@@ -61,14 +63,9 @@ if (container) {
                     </Route>
 
                     <Route path="clubs">
-                      <Route index element={<AllBookClubs />} />
-                      <Route path="joined" element={<JoinedBookClubs />} />
-                      <Route path=":id">
+                      <Route index element={<ClubsPage />} />
+                      <Route path=":id/:roomId?">
                         <Route index element={<BookClubPage />} />
-                        <Route path="rooms">
-                          <Route index element={<BookClubPage />} />
-                          <Route path=":roomId" element={<Room />} />
-                        </Route>
                       </Route>
                     </Route>
 
@@ -103,7 +100,7 @@ function NavBar() {
 
   return (
     <div className="h-svh flex flex-col">
-      <div className="flex p-2">
+      <div className="flex p-2 shadow-2xs shadow-accent">
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -194,7 +191,7 @@ function NavBar() {
           </NavigationMenu>
         )}
 
-        <div className="ml-10">
+        <div className="ml-2">
           <ModeToggle />
         </div>
       </div>

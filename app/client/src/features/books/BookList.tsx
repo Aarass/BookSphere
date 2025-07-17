@@ -1,5 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { useGetBooksQuery } from "./booksApi";
 import { SmallBookDisplay } from "./SmallBookDisplay";
+import { Plus } from "lucide-react";
+import { Link } from "react-router";
 
 export function BookList() {
   const { data: books, isLoading, error, isUninitialized } = useGetBooksQuery();
@@ -17,9 +20,16 @@ export function BookList() {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2 p-2">
+      <Button className="h-52 aspect-(--cover) p-0 m-0" asChild>
+        <Link to="/books/create">
+          <Plus />
+        </Link>
+      </Button>
       {books.map((book) => (
-        <SmallBookDisplay key={book.isbn} book={book} />
+        <div className="h-52">
+          <SmallBookDisplay key={book.isbn} book={book} />
+        </div>
       ))}
     </div>
   );

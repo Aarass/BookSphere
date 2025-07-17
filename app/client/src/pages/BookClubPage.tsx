@@ -23,8 +23,16 @@ import {
 } from "@/features/clubs/bookClubsApi";
 import { AllRooms } from "@/features/clubs/rooms/AllRooms";
 import { CreateRoomDialog } from "@/features/clubs/rooms/CreateRoom";
+import { Room } from "@/features/clubs/rooms/Room";
 import { BookClub } from "@interfaces/bookClub";
-import { Loader2Icon, Lock, LogOut, Menu, PlusIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  Lock,
+  LogOut,
+  Mailbox,
+  Menu,
+  PlusIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 
@@ -47,8 +55,8 @@ export function BookClubPage() {
   }
 
   return (
-    <div className="w-full h-full grow p-4 flex flex-col gap-4">
-      <div className="grid grid-cols-[auto_min-content] ">
+    <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+      <div className="grid grid-cols-[auto_min-content] items-center">
         <div>
           <h1 className="text-2xl font-bold">{club.tittle}</h1>
           <p className="text-sm opacity-80">{club.description}</p>
@@ -127,9 +135,18 @@ export function BookClubPage() {
 }
 
 function UnlockedContent({ club }: { club: BookClub }) {
+  let { id: clubId, roomId } = useParams();
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
-      <AllRooms club={club} />
+    <div className="h-full grid grid-cols-[1fr_3fr] gap-4 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden rounded-md border ">
+        <div className="flex p-4 gap-2 items-center">
+          <Mailbox size={40} />
+          <h1 className="text-2xl font-bold ">Rooms</h1>
+        </div>
+        <AllRooms club={club} />
+      </div>
+      <div className="flex overflow-hidden">{roomId ? <Room /> : null}</div>
     </div>
   );
 }

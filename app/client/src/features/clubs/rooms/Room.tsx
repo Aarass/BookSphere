@@ -63,13 +63,13 @@ export function Room() {
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden m-4 p-4 rounded-md border ">
+    <div className="flex flex-col flex-1 overflow-hidden p-4 rounded-md border ">
       <div>
         <div className="flex items-center gap-2">
           <MessagesSquare />
           <div>
             <p className="">{room.tittle}</p>
-            <p className="text-xs opacity-70">{club.tittle}</p>
+            <p className="text-xs opacity-70">{room.description}</p>
           </div>
         </div>
         <Separator className="mt-2" />

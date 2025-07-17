@@ -1,5 +1,5 @@
 import { Glasses, Hash, Sparkles } from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 import { NavLink } from "react-router";
 import { useGetLeaderboardQuery } from "./leaderboardsApi";
 
@@ -11,7 +11,6 @@ export function Leaderboard({
   genreId,
   setRefetchFunction,
 }: {
-  scoreIcon: ReactNode;
   criteria: Args["criteria"];
   genreId: Args["genreId"];
   setRefetchFunction?: ((_: Function) => void) | undefined;

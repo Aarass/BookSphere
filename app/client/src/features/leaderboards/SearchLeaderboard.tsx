@@ -40,10 +40,10 @@ export function SearchLeaderboard() {
   //------------------------
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <form
         onSubmit={handleSubmit(() => setReady(true))}
-        className="grid gap-4 p-4 grid-cols-[1fr_1fr]"
+        className="grid gap-4 grid-cols-[1fr_1fr]"
       >
         <div className="grid grid-cols-[max-content_max-content_min-content] grid-rows-[min-content_auto] gap-y-1 gap-x-4 items-center">
           <Label htmlFor="criteria">Criteria</Label>

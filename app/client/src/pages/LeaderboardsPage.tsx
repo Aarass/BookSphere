@@ -9,34 +9,35 @@ export function LeaderboardsPage() {
   const refetch2 = useRef<Function>(null);
 
   return (
-    <>
-      <div className="flex gap-28">
-        <div>
-          <div className="flex">
-            <h1 className="text-3xl font-bold mb-3">Best Rated</h1>
-            <RefetchButton refetch={refetch1} />
-          </div>
-          <Leaderboard
-            criteria="rating"
-            genreId="global"
-            setRefetchFunction={(fn) => (refetch1.current = fn)}
-          />
-        </div>
-
-        <div className="">
-          <div className="flex">
-            <h1 className="text-3xl font-bold mb-3">Popular</h1>
-            <RefetchButton refetch={refetch2} />
-          </div>
-          <Leaderboard
-            criteria="readers"
-            genreId="global"
-            setRefetchFunction={(fn) => (refetch2.current = fn)}
-          />
-        </div>
+    <div className="flex-1 self-center grid grid-cols-[min-content_min-content] grid-rows-[min-content_min-content] p-4 gap-8">
+      <div className="row-span-2">
+        <SearchLeaderboard />
       </div>
-      <SearchLeaderboard />
-    </>
+
+      <div className="">
+        <div className="flex">
+          <h1 className="text-3xl font-bold mb-3">Popular</h1>
+          <RefetchButton refetch={refetch2} />
+        </div>
+        <Leaderboard
+          criteria="readers"
+          genreId="global"
+          setRefetchFunction={(fn) => (refetch2.current = fn)}
+        />
+      </div>
+
+      <div>
+        <div className="flex">
+          <h1 className="text-3xl font-bold mb-3">Best Rated</h1>
+          <RefetchButton refetch={refetch1} />
+        </div>
+        <Leaderboard
+          criteria="rating"
+          genreId="global"
+          setRefetchFunction={(fn) => (refetch1.current = fn)}
+        />
+      </div>
+    </div>
   );
 }
 

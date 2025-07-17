@@ -1,3 +1,4 @@
+import { Separator } from "@/components/ui/separator";
 import { BookClubDisplay } from "./BookClubDisplay";
 import { useGetJoinedBookClubsQuery } from "./bookClubsApi";
 
@@ -14,8 +15,14 @@ export function JoinedBookClubs() {
 
   return (
     <div className="flex flex-col gap-2">
+      <Separator />
       {bookClubs.map((club) => (
-        <BookClubDisplay club={club} />
+        <>
+          <div className="p-4">
+            <BookClubDisplay club={club} />
+          </div>
+          <Separator />
+        </>
       ))}
     </div>
   );

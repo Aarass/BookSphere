@@ -1,6 +1,7 @@
 import { BookClub } from "@interfaces/bookClub";
 import { useGetAllRoomsQuery } from "./roomsApi";
 import { RoomDisplay } from "./RoomDisplay";
+import { Separator } from "@/components/ui/separator";
 
 export function AllRooms({ club }: { club: BookClub }) {
   const { data: rooms = [], isLoading } = useGetAllRoomsQuery(club.id);
@@ -9,7 +10,15 @@ export function AllRooms({ club }: { club: BookClub }) {
     return <p>Loading...</p>;
   }
 
-  return rooms.map((room) => (
-    <RoomDisplay key={room.id} room={room} club={club} />
-  ));
+  return (
+    <>
+      <Separator />
+      {rooms.map((room) => (
+        <>
+          <RoomDisplay key={room.id} room={room} club={club} />
+          <Separator />
+        </>
+      ))}
+    </>
+  );
 }
