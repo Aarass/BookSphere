@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { isDark, tint, useMyColor } from "@/utils/colors";
 
 export function Room() {
   let { id: clubId, roomId } = useParams();
@@ -172,12 +173,10 @@ function ForeignMessage({
   } else {
     return (
       <div className="grid grid-cols-[min-content_auto] gap-4 mt-2">
-        <Avatar className="relative">
-          <AvatarFallback>{af}</AvatarFallback>
-          <div
-            style={{ backgroundColor: user.color }}
-            className="absolute inset-0 opacity-40 bg-blend-color"
-          ></div>
+        <Avatar>
+          <AvatarFallback style={{ backgroundColor: tint(user.color) }}>
+            {af}
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex relative">
@@ -193,19 +192,18 @@ function ForeignMessage({
 }
 
 function MyMessage({ message }: { message: Message }) {
+  const myClr = useMyColor();
   const date = new Date(message.timestamp);
 
   return (
     <div className="flex ml-auto mt-0.5">
       <div
-        className={
-          style +
-          "bg-accent-foreground text-accent relative overflow-hidden z-0"
-        }
+        className={style}
+        style={{
+          backgroundColor: myClr,
+        }}
       >
-        <div className="bg-background absolute z-1 inset-0 opacity-40"></div>
-
-        <div className="flex items-end gap-2 z-20">
+        <div className="flex items-end gap-2">
           <p>{message.body}</p>
           <p className="text-xs text-right p-0 m-0 -mb-1">
             {date.getHours().toString().padStart(2, "0")}:

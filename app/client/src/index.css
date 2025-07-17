@@ -75,6 +75,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   --cover: 10/15;
+  --tmp: #ff0000;
 }
 
 .dark {

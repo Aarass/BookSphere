@@ -5,11 +5,13 @@ import { logout } from "@/features/auth/authSlice";
 import { CurrentlyReadingBooks } from "@/features/books/CurrentlyReadingBooks";
 import { ReadBooks } from "@/features/books/ReadBooks";
 import { useGetMeQuery } from "@/features/user/userApi";
+import { useMyColor } from "@/utils/colors";
 import { ChevronRight, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export function ProfilePage() {
   const { data: me, isLoading } = useGetMeQuery();
+  const myClr = useMyColor();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -27,8 +29,8 @@ export function ProfilePage() {
         <div className="grid grid-cols-[max-content_max-content] grid-rows-2 items-center py-2">
           <h1 className="text-2xl font-bold text-right m-0">{me.username}</h1>
           <Button
-            style={{ backgroundColor: me.color }}
-            className="row-span-2 cursor-pointer h-full m-2 relative z-0 overflow-hidden"
+            style={{ backgroundColor: myClr }}
+            className="row-span-2 cursor-pointer h-full m-2"
             onClick={async () => {
               const result = await dispatch(logout());
               if (logout.fulfilled.match(result)) {
@@ -36,17 +38,13 @@ export function ProfilePage() {
               }
             }}
           >
-            <div className="absolute inset-0 z-10 bg-white opacity-30"></div>
-            <LogOut className="z-20 " />
+            <LogOut className="text-foreground" />
           </Button>
           <h2 className="text-xl opacity-50 text-center m-0">
             {me.firstName} {me.lastName}
           </h2>
         </div>
-        <Separator
-          style={{ backgroundColor: me.color }}
-          className="col-span-2"
-        />
+        <Separator style={{ backgroundColor: myClr }} className="col-span-2" />
         <div className="mt-6 flex w-full flex-col gap-1">
           <h1 className="text-xl font-bold">Currently Reading</h1>
           <CurrentlyReadingBooks userId={me.id} />
