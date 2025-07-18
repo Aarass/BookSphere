@@ -5,17 +5,14 @@ import { recommendationService } from "../services/recommendationService";
 
 let router = express.Router();
 
-router.get("/recommendations/me/:userId", authenticate, async (req, res, next) => {
-  //let userId = req.session.data.userId!;
-  let userId = req.params["userId"];
-  try {
+router.get("/recommendations/me", authenticate, async (req, res, next) => {
+  let userId = req.session.data.userId!;
 
-    if (!userId) {
-      return next(createHttpError(401, `User not authenticated`));
-    }
+  try {
     console.log(`Retrieving recommendations for user: ${userId}`);
 
-    const recommendations = await recommendationService.getRecommendations(userId);
+    const recommendations =
+      await recommendationService.getRecommendations(userId);
     res.send(recommendations);
   } catch (error) {
     console.error("Recommendation error:", error);
@@ -24,3 +21,4 @@ router.get("/recommendations/me/:userId", authenticate, async (req, res, next) =
 });
 
 export default router;
+

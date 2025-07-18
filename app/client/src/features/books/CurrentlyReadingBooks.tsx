@@ -15,7 +15,7 @@ export function CurrentlyReadingBooks({ userId }: { userId: User["id"] }) {
   return (
     <div>
       <Carousel>
-        <CarouselContent className="-ml-2">
+        <CarouselContent className="-ml-2 h-48">
           {books.map((book) => (
             <CarouselItem className="basis-1/3 pl-2" key={book.isbn}>
               <SmallBookDisplay book={book} />

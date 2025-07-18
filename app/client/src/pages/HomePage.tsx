@@ -12,14 +12,17 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { SearchLeaderboard } from "@/features/leaderboards/SearchLeaderboard";
+import { Type1RecommendedBooks } from "@/features/books/Type1RecommendedBooks";
 
 export function HomePage() {
-  const [open, setOpen] = useState(false);
-
   return (
     <>
-      <div className="flex-1 overflow-hidden grid grid-cols-[auto_min-content] p-4">
-        <div></div>
+      <div className="flex-1 overflow-hidden grid grid-cols-[auto_min-content] gap-4 p-4">
+        <div className="flex flex-col gap-y-4 overflow-scroll">
+          <Type1RecommendedBooks />
+          <Type1RecommendedBooks />
+          <Type1RecommendedBooks />
+        </div>
         <div className="grid grid-rows-2 gap-4 overflow-hidden">
           <Leaderboard
             criteria="rating"
@@ -34,9 +37,7 @@ export function HomePage() {
 
           <Drawer>
             <DrawerTrigger asChild>
-              <Button type="button" onClick={() => setOpen(true)}>
-                Search by genre
-              </Button>
+              <Button type="button">Search by genre</Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>

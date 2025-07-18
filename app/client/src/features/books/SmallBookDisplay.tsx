@@ -19,7 +19,7 @@ export function SmallBookDisplay({ book }: { book: BookRaw }) {
       <ContextMenuTrigger className="z-[0]">
         <button
           type="button"
-          className="cursor-pointer h-full w-full overflow-hidden rounded-md"
+          className="cursor-pointer h-full overflow-hidden rounded-md"
           onClick={() => navigate(`/books/${book.isbn}`)}
         >
           <img
