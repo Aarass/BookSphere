@@ -42,7 +42,7 @@ export function SearchLeaderboard() {
   return (
     <div className="flex flex-col gap-4">
       {!ready ? null : (
-        <div>
+        <div className="h-[200px]">
           <Leaderboard
             criteria={criteria}
             genreId={genre?.id ?? "global"}
