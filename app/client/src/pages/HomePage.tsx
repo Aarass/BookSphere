@@ -20,7 +20,8 @@ export function HomePage() {
   return (
     <>
       <div className="flex-1 overflow-hidden grid grid-cols-[auto_min-content] gap-4 p-4">
-        <div className="flex flex-col gap-y-4 overflow-scroll">
+        {/* <div className="flex flex-col gap-y-4 overflow-scroll"></div>*/}
+        <div className="grid grid-rows-3 gap-4 overflow-hidden">
           <RecommendedBooksGenres />
           <RecommendedBooksClubs />
           <RecommendedBooksFavorite />
