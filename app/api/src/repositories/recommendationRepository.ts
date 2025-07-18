@@ -1,13 +1,13 @@
 import { BookRaw } from "@interfaces/book";
-import { getSession } from "../drivers/neo4j";
+import { getSession, query } from "../drivers/neo4j";
+import { toRawBook } from "./bookRepository";
 
 class RecommendationRepository {
-  async getRecommendations(userId: string): Promise<BookRaw[]> {
+  async basedOnFavoriteBook(userId: string): Promise<BookRaw[]> {
     const session = getSession();
 
-
     // TODO: Ovo je prototip mora da se izmeni malo ali i ovo prolazi
-    const result = await session.executeRead(async tx => {
+    const result = await session.executeRead(async (tx) => {
       return await tx.run(
         `
           MATCH (u:User {id: $userId})-[r:HAS_RATED]->(b:Book)
@@ -37,14 +37,14 @@ class RecommendationRepository {
           RETURN recBook
           LIMIT 10
           `,
-        { userId }
+        { userId },
       );
     });
 
     await session.close();
 
     return result.records.map((record) => {
-      const bookNode = record.get('recBook');
+      const bookNode = record.get("recBook");
 
       return {
         isbn: bookNode.properties.isbn,
@@ -53,9 +53,35 @@ class RecommendationRepository {
         imageUrl: bookNode.properties.imageUrl,
       } as BookRaw;
     });
+  }
 
+  async basedOnBookClubs(userId: string): Promise<BookRaw[]> {
+    const session = getSession();
 
+    try {
+      const result = await query<BookRaw>(
+        session,
+        `MATCH (me:User {id: $userId})-[:IS_MEMBER_OF]->(:BookClub)<-[:IS_MEMBER_OF]-(other: User)
+          WHERE other.id <> $userId
+          WITH DISTINCT other, me
+
+          MATCH (other)-[:IS_READING {status: "reading"}]->(otherBook: Book)
+          WITH DISTINCT otherBook, me
+
+          MATCH (me)-[:IS_READING]-(myBook: Book)
+          WITH otherBook, COLLECT(myBook) as myBooks
+
+          WHERE NOT otherBook IN myBooks
+          RETURN ${toRawBook("otherBook")}`,
+        { userId },
+      );
+
+      return result;
+    } finally {
+      await session.close();
+    }
   }
 }
 
 export const recommendationRepository = new RecommendationRepository();
+

@@ -16,15 +16,15 @@ export function SmallBookDisplay({ book }: { book: BookRaw }) {
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="z-[0]">
+      <ContextMenuTrigger asChild>
         <button
           type="button"
-          className="cursor-pointer h-full overflow-hidden rounded-md"
+          className="cursor-pointer overflow-hidden rounded-md aspect-(--cover) h-[inherit] w-[inherit]"
           onClick={() => navigate(`/books/${book.isbn}`)}
         >
           <img
             src={book.imageUrl}
-            className="h-full aspect-(--cover) object-center object-cover"
+            className="h-full w-full object-center object-cover"
           />
         </button>
       </ContextMenuTrigger>

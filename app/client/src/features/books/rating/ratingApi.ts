@@ -32,6 +32,7 @@ export const apiWithRating = api.injectEndpoints({
           id: isbn,
         },
         { type: "BookStats", id: isbn },
+        { type: "BookList", id: "RECOMMENDED" },
       ],
     }),
     updateBookRating: builder.mutation<
@@ -52,6 +53,7 @@ export const apiWithRating = api.injectEndpoints({
           id: isbn,
         },
         { type: "BookStats", id: isbn },
+        { type: "BookList", id: "RECOMMENDED" },
       ],
     }),
     deleteBookRating: builder.mutation<void, Book["isbn"]>({
@@ -66,6 +68,7 @@ export const apiWithRating = api.injectEndpoints({
           id: isbn,
         },
         { type: "BookStats", id: isbn },
+        { type: "BookList", id: "RECOMMENDED" },
       ],
     }),
   }),

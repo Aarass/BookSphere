@@ -530,7 +530,7 @@ function toGenreIds(bookVar: string) {
   return `COLLECT{MATCH (${bookVar})-[:IS_OF_GENRE]->(g:Genre) return g.id} as ids`;
 }
 
-function toRawBook(bookVar: string) {
+export function toRawBook(bookVar: string) {
   return `
     ${bookVar}.isbn as isbn,
     ${bookVar}.title as title,
