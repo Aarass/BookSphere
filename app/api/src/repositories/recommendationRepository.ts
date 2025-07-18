@@ -81,6 +81,33 @@ class RecommendationRepository {
       await session.close();
     }
   }
+
+  async basedOnTopGenres(userId: string): Promise<BookRaw[]> {
+    const session = getSession();
+    try {
+      const result = await query<BookRaw>(
+        session,
+        `MATCH (me:User {id: $userId})
+          MATCH (me)-[:IS_READING]->(b:Book)
+          MATCH (b)-[:IS_OF_GENRE]->(g: Genre)
+          WITH me, g, COUNT(*) as gCount
+          ORDER BY gCount
+          LIMIT 3
+
+          MATCH (g)<-[:IS_OF_GENRE]-(b: Book)
+          WHERE NOT EXISTS{ (me)-[:IS_READING]->(b) }
+          WITH b, COUNT{ (b)<-[:IS_READING]-() } as score
+          ORDER BY score DESC
+          LIMIT 10
+          RETURN DISTINCT ${toRawBook("b")}`,
+        { userId },
+      );
+
+      return result;
+    } finally {
+      await session.close();
+    }
+  }
 }
 
 export const recommendationRepository = new RecommendationRepository();

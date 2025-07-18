@@ -26,7 +26,10 @@ export const apiWithBooks = api.injectEndpoints({
       query: (userId) => `/users/${userId}/books/completed`,
       providesTags: [{ type: "BookList", id: "COMPLETED" }],
     }),
-    getRecommendedBooks: builder.query<BookRaw[], "favorite" | "clubs">({
+    getRecommendedBooks: builder.query<
+      BookRaw[],
+      "favorite" | "clubs" | "genres"
+    >({
       query: (type) => `/recommendations/me/${type}`,
       providesTags: [{ type: "BookList", id: "RECOMMENDED" }],
     }),

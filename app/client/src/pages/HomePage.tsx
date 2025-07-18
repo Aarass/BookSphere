@@ -14,12 +14,14 @@ import {
 import { SearchLeaderboard } from "@/features/leaderboards/SearchLeaderboard";
 import { RecommendedBooksFavorite } from "@/features/books/RecommendedBooksFavorite";
 import { RecommendedBooksClubs } from "@/features/books/RecommendedBooksClubs";
+import { RecommendedBooksGenres } from "@/features/books/RecommendedBooksGenres";
 
 export function HomePage() {
   return (
     <>
       <div className="flex-1 overflow-hidden grid grid-cols-[auto_min-content] gap-4 p-4">
         <div className="flex flex-col gap-y-4 overflow-scroll">
+          <RecommendedBooksGenres />
           <RecommendedBooksClubs />
           <RecommendedBooksFavorite />
         </div>

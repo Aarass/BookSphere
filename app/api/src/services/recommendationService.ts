@@ -8,6 +8,8 @@ class RecommendationService {
         return await recommendationRepository.basedOnFavoriteBook(userId);
       case "clubs":
         return await recommendationRepository.basedOnBookClubs(userId);
+      case "genres":
+        return await recommendationRepository.basedOnTopGenres(userId);
       default:
         throw new Error("Not supported");
     }
