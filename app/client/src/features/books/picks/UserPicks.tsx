@@ -3,32 +3,28 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { BookRaw } from "@interfaces/book";
+import { Book } from "@interfaces/book";
 import { User } from "@interfaces/user";
-import { SmallBookDisplay } from "../SmallBookDisplay";
 import { FakeSmallBookDisplay } from "../FakeSmallBookDisplay";
-import { useGetUserPicksQuery } from "./picksApi";
+import { SmallBookDisplay } from "../SmallBookDisplay";
+import { useGetUserPicksListsQuery } from "./picksApi";
 
 export function UserPicks({ userId }: { userId: User["id"] }) {
-  const { data } = useGetUserPicksQuery(userId);
+  const { data: lists = [] } = useGetUserPicksListsQuery(userId);
 
   return (
     <div className="flex gap-2">
-      <section>
-        <h1 className="mb-1 text-xl font-bold">Naslov</h1>
-        <SingleList userId={userId} />
-      </section>
-      <section>
-        <h1 className="mb-1 text-xl font-bold">Naslov</h1>
-        <SingleList userId={userId} />
-      </section>
+      {lists.map((list) => (
+        <section>
+          <h1 className="mb-1 text-xl font-bold">{list.description}</h1>
+          <SingleList books={list.books} />
+        </section>
+      ))}
     </div>
   );
 }
 
-export function SingleList({ userId }: { userId: User["id"] }) {
-  const books: BookRaw[] = [];
-
+export function SingleList({ books }: { books: Book[] }) {
   return (
     <Carousel
       opts={{
@@ -47,10 +43,10 @@ export function SingleList({ userId }: { userId: User["id"] }) {
           </CarouselItem>
         ))}
         {(() => {
-          if (books.length > 3) return null;
+          if (books.length >= 2) return null;
 
           const fakes = [];
-          for (let i = books.length; i < 3; i++) {
+          for (let i = books.length; i < 2; i++) {
             fakes.push(
               <CarouselItem className="basis-2/5 pt-2" key={i}>
                 <FakeSmallBookDisplay />

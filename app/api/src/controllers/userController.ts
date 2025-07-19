@@ -60,27 +60,16 @@ router.post(
   async (req, res, next) => {
     let userId = req.session.data.userId!;
 
-    const { description, bookIsbns } = req.body;
+    const { description } = req.body;
 
-    if (
-      !description ||
-      !Array.isArray(bookIsbns) ||
-      bookIsbns.length === 0 ||
-      bookIsbns.length > 5
-    ) {
-      return next(
-        createHttpError(
-          400,
-          "Invalid data: description and up to 5 books required",
-        ),
-      );
+    if (!description) {
+      return next(createHttpError(400, "Invalid data: description required"));
     }
 
     try {
       const list = await userRecommendationService.createList(
         userId,
         description,
-        bookIsbns,
       );
       res.status(201).json(list);
     } catch (err) {
@@ -91,6 +80,46 @@ router.post(
           "Something went wrong while creating recommendation list",
         ),
       );
+    }
+  },
+);
+
+router.post(
+  "/users/me/recommendations/:id/books",
+  authenticate,
+  async (req, res, next) => {
+    const listId = req.params["id"];
+    const userId = req.session.data.userId!;
+
+    if (!req.body.isbn || typeof req.body.isbn !== "string") {
+      return next(createHttpError(400, "Invalid data"));
+    }
+
+    try {
+      await userRecommendationService.addToList(userId, listId, req.body);
+      res.sendStatus(201);
+    } catch (err) {
+      return next(createHttpError(500, "Something went wrong"));
+    }
+  },
+);
+
+router.delete(
+  "/users/me/recommendations/:id/books",
+  authenticate,
+  async (req, res, next) => {
+    const listId = req.params["id"];
+    const userId = req.session.data.userId!;
+
+    if (!req.body.isbn || typeof req.body.isbn !== "string") {
+      return next(createHttpError(400, "Invalid data"));
+    }
+
+    try {
+      await userRecommendationService.removeFromList(userId, listId, req.body);
+      res.sendStatus(201);
+    } catch (err) {
+      return next(createHttpError(500, "Something went wrong"));
     }
   },
 );

@@ -1,4 +1,15 @@
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -17,16 +28,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { BookHeart, LucideLoader2, Plus } from "lucide-react";
+import { useGetMeQuery } from "@/features/user/userApi";
+import { Book } from "@interfaces/book";
+import { User } from "@interfaces/user";
+import { BookHeart, LucideLoader2, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useGetUserPicksQuery, usePostPicksListMutation } from "./picksApi";
-import { User } from "@interfaces/user";
-import { useGetMeQuery } from "@/features/user/userApi";
+import {
+  useAddToPicksListMutation,
+  useCreatePicksListMutation,
+  useDeletePicksListMutation,
+  useGetUserPicksListsQuery,
+  useRemoveFromPicksListMutation,
+} from "./picksApi";
 
 const defaultMode = 1;
 
-export function AddBookToPicks() {
+export function AddBookToPicks({ isbn }: { isbn: Book["isbn"] }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState(defaultMode);
 
@@ -57,7 +75,13 @@ export function AddBookToPicks() {
           if (!me) return null;
 
           if (mode === 1) {
-            return <Mode1 userId={me.id} openCreate={() => setMode(2)}></Mode1>;
+            return (
+              <Mode1
+                userId={me.id}
+                isbn={isbn}
+                openCreate={() => setMode(2)}
+              ></Mode1>
+            );
           } else {
             return <Mode2 done={() => setMode(1)}></Mode2>;
           }
@@ -69,9 +93,11 @@ export function AddBookToPicks() {
 
 function Mode1({
   userId,
+  isbn,
   openCreate,
 }: {
   userId: User["id"];
+  isbn: Book["isbn"];
   openCreate: () => void;
 }) {
   return (
@@ -81,7 +107,7 @@ function Mode1({
       </DialogHeader>
 
       <div className="my-4 flex flex-col gap-4">
-        <PicksList userId={userId} />
+        <PicksList userId={userId} isbn={isbn} />
       </div>
       <DialogFooter>
         <Button type="submit" className="w-full" onClick={openCreate}>
@@ -96,15 +122,13 @@ function Mode1({
 function Mode2({ done }: { done: () => void }) {
   const { register, handleSubmit } = useForm();
 
-  const [createPickList, { isLoading: creating }] = usePostPicksListMutation();
+  const [createPickList, { isLoading: creating }] =
+    useCreatePicksListMutation();
 
   async function create(data: any) {
     const description = data["desc"] as string;
 
-    const { error } = await createPickList({
-      description,
-      bookIsbns: [],
-    });
+    const { error } = await createPickList({ description });
 
     if (!error) {
       done();
@@ -151,26 +175,73 @@ function Mode2({ done }: { done: () => void }) {
   );
 }
 
-export function PicksList({ userId }: { userId: User["id"] }) {
-  const { data: list = [], isLoading } = useGetUserPicksQuery(userId);
+function PicksList({
+  userId,
+  isbn,
+}: {
+  userId: User["id"];
+  isbn: Book["isbn"];
+}) {
+  const {
+    data: lists = [],
+    isLoading,
+    isFetching,
+  } = useGetUserPicksListsQuery(userId);
+
+  const [addToList, { isLoading: adding }] = useAddToPicksListMutation();
+  const [removeFromList, { isLoading: removing }] =
+    useRemoveFromPicksListMutation();
+  const [deleteList, { isLoading: deleting }] = useDeletePicksListMutation();
 
   if (isLoading) {
     return <p className="text-center">Loading</p>;
   }
 
-  if (list.length === 0) {
+  if (lists.length === 0) {
     return <p className="text-center">You don't have any lists created yet</p>;
   }
 
-  return list.map((item) => (
-    <div className="flex items-center gap-3">
-      <Checkbox id="asdf" />
-      <Label htmlFor="asdf">Accept terms and conditions</Label>
+  return lists.map((list) => (
+    <div className="flex items-center gap-3" key={list._id}>
+      <Checkbox
+        id={list._id}
+        defaultChecked={list.books.map((b) => b.isbn).includes(isbn)}
+        disabled={adding || removing || deleting || isFetching}
+        onCheckedChange={(newValue) => {
+          if (newValue == true) {
+            addToList({ listId: list._id, isbn });
+          } else {
+            removeFromList({ listId: list._id, isbn });
+          }
+        }}
+      />
+      <Label htmlFor={list._id}>{list.description}</Label>
+      <AlertDialog>
+        <AlertDialogTrigger className="ml-auto" asChild>
+          <Button size="sm" variant="ghost" className="ml-auto cursor-pointer">
+            <Trash />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                deleteList(list._id);
+              }}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   ));
-
-  return null;
 }
-// pressed={pressed}
-// onPressedChange={setPressed}
-// className={`cursor-pointer ${pressed ? "bg-secondary" : ""}`}

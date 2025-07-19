@@ -1,6 +1,10 @@
 import { api } from "@/app/store";
 import { Book } from "@interfaces/book";
-import { UserRecommendationListDto } from "@interfaces/dtos/userRecommendationList";
+import {
+  AddBookToListDto,
+  RemoveBookFromListDto,
+  UserRecommendationListDto,
+} from "@interfaces/dtos/userRecommendationList";
 import {
   RecommendationList,
   RecommendationListWithBooks,
@@ -10,18 +14,20 @@ import { toast } from "sonner";
 
 export const apiWithPicks = api.injectEndpoints({
   endpoints: (builder) => ({
-    getUserPicks: builder.query<RecommendationListWithBooks[], User["id"]>({
-      query: (userId) => `users/${userId}/recommendations`,
-      providesTags: (_result, _error, userId) => [
-        {
-          type: "UserPicks",
-          id: `${userId}`,
-        },
-      ],
-    }),
-    postPicksList: builder.mutation<
+    getUserPicksLists: builder.query<RecommendationListWithBooks[], User["id"]>(
+      {
+        query: (userId) => `users/${userId}/recommendations`,
+        providesTags: (_result, _error, userId) => [
+          {
+            type: "UserPicks",
+            id: `${userId}`,
+          },
+        ],
+      },
+    ),
+    createPicksList: builder.mutation<
       UserRecommendationListDto,
-      { description: string; bookIsbns: Book["isbn"][] }
+      { description: string }
     >({
       query: (dto) => ({
         url: `/users/me/recommendations`,
@@ -77,21 +83,13 @@ export const apiWithPicks = api.injectEndpoints({
     //     },
     //   ],
     // }),
-    deletePicksList: builder.mutation<
-      void,
-      { userId: User["id"]; listId: RecommendationList["_id"] }
-    >({
-      query: ({ listId }) => ({
+    deletePicksList: builder.mutation<void, RecommendationList["_id"]>({
+      query: (listId) => ({
         url: `/users/me/recommendations/${listId}`,
         method: "DELETE",
         responseHandler: "text",
       }),
-      invalidatesTags: (_result, _error, { userId }) => [
-        {
-          type: "UserPicks",
-          id: `${userId}`,
-        },
-      ],
+      invalidatesTags: (_result, _error) => ["UserPicks"],
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
@@ -103,11 +101,35 @@ export const apiWithPicks = api.injectEndpoints({
         }
       },
     }),
+    addToPicksList: builder.mutation<
+      void,
+      { listId: string; isbn: Book["isbn"] }
+    >({
+      query: ({ listId, isbn }) => ({
+        url: `/users/me/recommendations/${listId}/books`,
+        method: "POST",
+        body: { isbn } satisfies AddBookToListDto,
+        responseHandler: "text",
+      }),
+    }),
+    removeFromPicksList: builder.mutation<
+      void,
+      { listId: string; isbn: Book["isbn"] }
+    >({
+      query: ({ listId, isbn }) => ({
+        url: `/users/me/recommendations/${listId}/books`,
+        method: "DELETE",
+        body: { isbn } satisfies RemoveBookFromListDto,
+        responseHandler: "text",
+      }),
+    }),
   }),
 });
 
 export const {
-  useGetUserPicksQuery,
-  usePostPicksListMutation,
+  useGetUserPicksListsQuery,
+  useCreatePicksListMutation,
   useDeletePicksListMutation,
+  useAddToPicksListMutation,
+  useRemoveFromPicksListMutation,
 } = apiWithPicks;

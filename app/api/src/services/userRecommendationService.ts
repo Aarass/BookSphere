@@ -1,16 +1,42 @@
 import { Book } from "@interfaces/book";
 import { UserRecommendationListDto } from "@interfaces/dtos/userRecommendationList";
+import { AddBookToListDto } from "@interfaces/dtos/userRecommendationList";
 import { RecommendationListWithBooks } from "@interfaces/recommendationList";
 import { userRecommendationRepository } from "../repositories/userRecommendationRepository";
 import bookService from "./bookService";
 
 class UserRecommendationService {
-  async createList(neo4jUserId: string, description: string, bookIsbns: string[]): Promise<UserRecommendationListDto> {
-    return await userRecommendationRepository.createList(neo4jUserId, description, bookIsbns);
+  async createList(
+    neo4jUserId: string,
+    description: string,
+  ): Promise<UserRecommendationListDto> {
+    return await userRecommendationRepository.createList(
+      neo4jUserId,
+      description,
+    );
   }
 
-  async getListsWithBooks(neo4jUserId: string): Promise<RecommendationListWithBooks[]> {
-    const lists = await userRecommendationRepository.getListsByUserId(neo4jUserId);
+  async addToList(userId: string, listId: string, body: AddBookToListDto) {
+    return await userRecommendationRepository.addToList(
+      userId,
+      listId,
+      body.isbn,
+    );
+  }
+
+  async removeFromList(userId: string, listId: string, body: AddBookToListDto) {
+    return await userRecommendationRepository.deleteFromList(
+      userId,
+      listId,
+      body.isbn,
+    );
+  }
+
+  async getListsWithBooks(
+    neo4jUserId: string,
+  ): Promise<RecommendationListWithBooks[]> {
+    const lists =
+      await userRecommendationRepository.getListsByUserId(neo4jUserId);
 
     const enrichedLists = await Promise.all(
       lists.map(async (list) => {
@@ -19,7 +45,7 @@ class UserRecommendationService {
         }
 
         const books: Book[] = await Promise.all(
-          list.bookIsbns.map((isbn: string) => bookService.getBookByISBN(isbn))
+          list.bookIsbns.map((isbn: string) => bookService.getBookByISBN(isbn)),
         );
 
         return {
@@ -29,21 +55,24 @@ class UserRecommendationService {
           books,
           createdAt: list.createdAt,
         };
-      })
+      }),
     );
 
     return enrichedLists;
   }
 
   async deleteList(listId: string, neo4jUserId: string): Promise<boolean> {
-    const deleted = await userRecommendationRepository.deleteListById(listId, neo4jUserId);
+    const deleted = await userRecommendationRepository.deleteListById(
+      listId,
+      neo4jUserId,
+    );
     if (!deleted) {
       throw new Error("Lista nije pronađena ili ne pripada korisniku.");
     }
 
     return deleted;
   }
-};
-
+}
 
 export const userRecommendationService = new UserRecommendationService();
+

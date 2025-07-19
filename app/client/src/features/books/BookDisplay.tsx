@@ -50,7 +50,7 @@ export function BookDisplay({ book }: { book: Book }) {
           </TooltipContent>
         </Tooltip>
 
-        <AddBookToPicks />
+        <AddBookToPicks isbn={book.isbn} />
 
         <MyReadingStatus isbn={book.isbn} />
       </div>
