@@ -34,7 +34,7 @@ export function CommentsList(props: {
         </CollapsibleContent>
       </Collapsible>
 
-      {comments.map((comment) => {
+      {[...comments, ...comments, ...comments, ...comments].map((comment) => {
         if (props.createCommentOpen && me?.id === comment.authorId) {
           return null;
         }

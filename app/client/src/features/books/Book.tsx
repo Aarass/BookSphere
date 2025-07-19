@@ -24,5 +24,9 @@ export function Book() {
     return <p>There was an error</p>;
   }
 
-  return <BookDisplay book={book} />;
+  return (
+    <div className="flex-1 overflow-hidden">
+      <BookDisplay book={book} />
+    </div>
+  );
 }

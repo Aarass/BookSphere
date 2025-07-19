@@ -202,7 +202,7 @@ function PicksList({
   }
 
   return lists.map((list) => (
-    <div className="flex items-center gap-3" key={list._id}>
+    <div className="flex items-center gap-3 max-w-3xs" key={list._id}>
       <Checkbox
         id={list._id}
         defaultChecked={list.books.map((b) => b.isbn).includes(isbn)}
@@ -215,7 +215,9 @@ function PicksList({
           }
         }}
       />
-      <Label htmlFor={list._id}>{list.description}</Label>
+      <Label htmlFor={list._id} className="text-wrap">
+        {list.description}
+      </Label>
       <AlertDialog>
         <AlertDialogTrigger className="ml-auto" asChild>
           <Button size="sm" variant="ghost" className="ml-auto cursor-pointer">

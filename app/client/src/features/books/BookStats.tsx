@@ -35,7 +35,7 @@ export function BookStats({ isbn }: { isbn: Book["isbn"] }) {
   const rating = (ratingsSum / ratingsCount).toFixed(2);
 
   return (
-    <div className="flex gap-4">
+    <>
       <Tooltip>
         <TooltipTrigger className="flex items-center">
           <Star />
@@ -68,6 +68,6 @@ export function BookStats({ isbn }: { isbn: Book["isbn"] }) {
           <p>Number of people currently reading this book</p>
         </TooltipContent>
       </Tooltip>
-    </div>
+    </>
   );
 }
