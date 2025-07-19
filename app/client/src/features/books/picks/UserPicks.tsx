@@ -24,9 +24,16 @@ export function UserPicks({
   return (
     <div className="flex gap-2">
       {lists.map((list) => (
-        <section key={list._id}>
-          <h1 className="mb-1 text-xl font-bold">{list.description}</h1>
-          <SingleList books={list.books} />
+        <section
+          key={list._id}
+          className="w-40 h-full flex flex-col overflow-hidden"
+        >
+          <h1 className="mb-1 text-xl font-bold truncate">
+            {list.description}
+          </h1>
+          <div className="flex-1 overflow-hidden">
+            <SingleList books={list.books} />
+          </div>
         </section>
       ))}
     </div>
@@ -40,30 +47,20 @@ export function SingleList({ books }: { books: Book[] }) {
         align: "start",
       }}
       orientation="vertical"
-      className="w-50 h-full"
+      className="h-full w-full"
     >
       <CarouselContent className="-mt-1 h-full">
-        {books.map((book) => (
+        {[
+          ...books,
+          ...Array.from({ length: Math.max(0, 2 - books.length) }, () => null),
+        ].map((book, index) => (
           <CarouselItem
-            className="basis-2/5 aspect-(--cover) pt-2"
-            key={book.isbn}
+            className="pt-1 w-full basis-auto "
+            key={book ? book.isbn : index}
           >
-            <SmallBookDisplay book={book} />
+            {book ? <SmallBookDisplay book={book} /> : <FakeSmallBookDisplay />}
           </CarouselItem>
         ))}
-        {(() => {
-          if (books.length >= 2) return null;
-
-          const fakes = [];
-          for (let i = books.length; i < 2; i++) {
-            fakes.push(
-              <CarouselItem className="basis-2/5 pt-2" key={i}>
-                <FakeSmallBookDisplay />
-              </CarouselItem>,
-            );
-          }
-          return fakes;
-        })()}
       </CarouselContent>
     </Carousel>
   );
