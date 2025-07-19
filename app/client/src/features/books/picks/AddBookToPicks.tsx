@@ -186,7 +186,7 @@ function PicksList({
     data: lists = [],
     isLoading,
     isFetching,
-  } = useGetUserPicksListsQuery(userId);
+  } = useGetUserPicksListsQuery({ userId, isMe: true });
 
   const [addToList, { isLoading: adding }] = useAddToPicksListMutation();
   const [removeFromList, { isLoading: removing }] =

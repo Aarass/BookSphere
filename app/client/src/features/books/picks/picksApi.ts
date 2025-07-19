@@ -1,4 +1,5 @@
-import { api } from "@/app/store";
+import { api, store } from "@/app/store";
+import { apiWithUsers } from "@/features/user/userApi";
 import { Book } from "@interfaces/book";
 import {
   AddBookToListDto,
@@ -14,17 +15,20 @@ import { toast } from "sonner";
 
 export const apiWithPicks = api.injectEndpoints({
   endpoints: (builder) => ({
-    getUserPicksLists: builder.query<RecommendationListWithBooks[], User["id"]>(
-      {
-        query: (userId) => `users/${userId}/recommendations`,
-        providesTags: (_result, _error, userId) => [
+    getUserPicksLists: builder.query<
+      RecommendationListWithBooks[],
+      { userId: User["id"]; isMe: boolean }
+    >({
+      query: ({ userId }) => `users/${userId}/recommendations`,
+      providesTags: (_result, _error, { userId, isMe }) => {
+        return [
           {
             type: "UserPicks",
-            id: `${userId}`,
+            id: `${isMe ? "my" : userId}`,
           },
-        ],
+        ];
       },
-    ),
+    }),
     createPicksList: builder.mutation<
       UserRecommendationListDto,
       { description: string }
@@ -34,15 +38,7 @@ export const apiWithPicks = api.injectEndpoints({
         method: "POST",
         body: dto,
       }),
-      invalidatesTags: (result) =>
-        !result
-          ? []
-          : [
-              {
-                type: "UserPicks",
-                id: `${result.neo4jUserId}`,
-              },
-            ],
+      invalidatesTags: [{ type: "UserPicks", id: `my` }],
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
@@ -89,7 +85,7 @@ export const apiWithPicks = api.injectEndpoints({
         method: "DELETE",
         responseHandler: "text",
       }),
-      invalidatesTags: (_result, _error) => ["UserPicks"],
+      invalidatesTags: [{ type: "UserPicks", id: `my` }],
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
@@ -111,6 +107,7 @@ export const apiWithPicks = api.injectEndpoints({
         body: { isbn } satisfies AddBookToListDto,
         responseHandler: "text",
       }),
+      invalidatesTags: [{ type: "UserPicks", id: `my` }],
     }),
     removeFromPicksList: builder.mutation<
       void,
@@ -122,6 +119,7 @@ export const apiWithPicks = api.injectEndpoints({
         body: { isbn } satisfies RemoveBookFromListDto,
         responseHandler: "text",
       }),
+      invalidatesTags: [{ type: "UserPicks", id: `my` }],
     }),
   }),
 });

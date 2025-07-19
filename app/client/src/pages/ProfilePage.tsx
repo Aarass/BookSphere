@@ -65,7 +65,7 @@ export function ProfilePage() {
         </div>
         <div className="flex flex-col">
           <div className="grow basis-0 overflow-hidden flex gap-2">
-            <UserPicks userId={me.id} />
+            <UserPicks userId={me.id} isMe={true} />
           </div>
         </div>
       </div>

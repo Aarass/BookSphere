@@ -9,13 +9,22 @@ import { FakeSmallBookDisplay } from "../FakeSmallBookDisplay";
 import { SmallBookDisplay } from "../SmallBookDisplay";
 import { useGetUserPicksListsQuery } from "./picksApi";
 
-export function UserPicks({ userId }: { userId: User["id"] }) {
-  const { data: lists = [] } = useGetUserPicksListsQuery(userId);
+export function UserPicks({
+  userId,
+  isMe,
+}: {
+  userId: User["id"];
+  isMe: boolean;
+}) {
+  const { data: lists = [] } = useGetUserPicksListsQuery({
+    userId,
+    isMe,
+  });
 
   return (
     <div className="flex gap-2">
       {lists.map((list) => (
-        <section>
+        <section key={list._id}>
           <h1 className="mb-1 text-xl font-bold">{list.description}</h1>
           <SingleList books={list.books} />
         </section>
