@@ -5,10 +5,28 @@ import {
 } from "@/components/ui/carousel";
 import { BookRaw } from "@interfaces/book";
 import { User } from "@interfaces/user";
-import { FakeSmallBookDisplay } from "./FakeSmallBookDisplay";
-import { SmallBookDisplay } from "./SmallBookDisplay";
+import { SmallBookDisplay } from "../SmallBookDisplay";
+import { FakeSmallBookDisplay } from "../FakeSmallBookDisplay";
+import { useGetUserPicksQuery } from "./picksApi";
 
 export function UserPicks({ userId }: { userId: User["id"] }) {
+  const { data } = useGetUserPicksQuery(userId);
+
+  return (
+    <div className="flex gap-2">
+      <section>
+        <h1 className="mb-1 text-xl font-bold">Naslov</h1>
+        <SingleList userId={userId} />
+      </section>
+      <section>
+        <h1 className="mb-1 text-xl font-bold">Naslov</h1>
+        <SingleList userId={userId} />
+      </section>
+    </div>
+  );
+}
+
+export function SingleList({ userId }: { userId: User["id"] }) {
   const books: BookRaw[] = [];
 
   return (

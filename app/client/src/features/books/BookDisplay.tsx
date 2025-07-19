@@ -11,6 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AddBookToPicks } from "./picks/AddBookToPicks";
 
 export function BookDisplay({ book }: { book: Book }) {
   const [pressed, setPressed] = useState(false);
@@ -48,6 +49,9 @@ export function BookDisplay({ book }: { book: Book }) {
             <p>Leave a review</p>
           </TooltipContent>
         </Tooltip>
+
+        <AddBookToPicks />
+
         <MyReadingStatus isbn={book.isbn} />
       </div>
 

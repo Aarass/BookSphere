@@ -55,7 +55,7 @@ router.get("/users/:userId/books/completed", async (req, res, next) => {
 });
 
 router.post(
-  "/user/me/recommendations",
+  "/users/me/recommendations",
   authenticate,
   async (req, res, next) => {
     let userId = req.session.data.userId!;
@@ -95,7 +95,7 @@ router.post(
   },
 );
 
-router.get("/:userId/recommendations", async (req, res, next) => {
+router.get("/users/:userId/recommendations", async (req, res, next) => {
   const userId = req.params["userId"];
 
   try {
@@ -114,7 +114,7 @@ router.get("/:userId/recommendations", async (req, res, next) => {
 });
 
 router.delete(
-  "/user/me/recommendations/:listId",
+  "/users/me/recommendations/:listId",
   authenticate,
   async (req, res, next) => {
     let userId = req.session.data.userId!;

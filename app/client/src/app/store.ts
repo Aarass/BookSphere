@@ -18,6 +18,7 @@ export const api = createApi({
     "BookComment",
     "BookReadingStatus",
     "BookList",
+    "UserPicks",
   ],
 });
 
