@@ -1,7 +1,9 @@
 import { api } from "@/app/store";
+import { redirect } from "react-router";
 import { Book, BookRaw, ReadingStatus } from "@interfaces/book";
 import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
 import { User } from "@interfaces/user";
+import { toast } from "sonner";
 
 export const apiWithBooks = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -40,6 +42,14 @@ export const apiWithBooks = api.injectEndpoints({
         body: createBookDto,
       }),
       invalidatesTags: [{ type: "Book", id: "LIST" }],
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast("Successfully created a book");
+        } catch {
+          toast("There was an error while trying to create a book");
+        }
+      },
     }),
     deleteBook: builder.mutation<void, Book["isbn"]>({
       query: (isbn) => ({
@@ -52,6 +62,14 @@ export const apiWithBooks = api.injectEndpoints({
           { type: "Book", id: "LIST" },
           { type: "Book", id: isbn },
         ];
+      },
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast("Successfully deleted a book");
+        } catch {
+          toast("There was an error while trying to delete a book");
+        }
       },
     }),
     // -----------------------------------------------------------------------

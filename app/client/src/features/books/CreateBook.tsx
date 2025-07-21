@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { AuthorAutocomplete } from "../authors/AuthorAutocomplete";
 import { GenresAutocomplete } from "../genres/GenresAutocomplete";
 import { useCreateBookMutation } from "./booksApi";
+import { useNavigate } from "react-router";
 
 export function CreateBook() {
   // const dispatch = useAppDispatch();
@@ -32,11 +33,12 @@ export function CreateBook() {
     formState: { errors },
   } = useForm();
 
+  const navigate = useNavigate();
   const [createBook, { isLoading }] = useCreateBookMutation();
 
   const linkValue = watch("link");
 
-  function submit(formData: any) {
+  async function submit(formData: any) {
     const dto: CreateBookDto = {
       isbn: formData.isbn,
       title: formData.title,
@@ -46,7 +48,10 @@ export function CreateBook() {
       genreIds: formData.genres.map((g: Genre) => g.id),
     };
 
-    createBook(dto);
+    const res = await createBook(dto);
+    if (!res.error) {
+      navigate("/books");
+    }
   }
 
   const thereIsErrors = Object.values(errors).some(Boolean);

@@ -12,6 +12,7 @@ import {
   useGetMyCommentQuery,
   useUpdateMyCommentMutation,
 } from "./commentsApi";
+import { RateBook } from "../rating/RateBook";
 
 export function CreateComment(props: { isbn: Book["isbn"] }) {
   const [input, setInput] = useState("");
@@ -60,7 +61,7 @@ export function CreateComment(props: { isbn: Book["isbn"] }) {
   }
 
   return (
-    <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 px-4 shadow-sm">
+    <div className="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 px-4 shadow-sm">
       {(() => {
         if (isLoading) {
           return <p>Loading...</p>;

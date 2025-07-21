@@ -25,7 +25,7 @@ export function Book() {
   }
 
   return (
-    <div className="flex-1 overflow-hidden">
+    <div className="flex-1 overflow-hidden p-4">
       <BookDisplay book={book} />
     </div>
   );

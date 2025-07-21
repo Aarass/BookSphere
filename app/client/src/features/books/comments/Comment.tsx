@@ -6,7 +6,7 @@ export function Comment({ comment }: { comment: CommentType }) {
   const { data: user } = useGetUserQuery(comment.authorId);
 
   return (
-    <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 px-4 shadow-sm">
+    <div className="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 px-4 shadow-sm">
       <div className="flex items-center gap-2">
         {user ? (
           <>

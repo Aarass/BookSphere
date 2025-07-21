@@ -22,19 +22,19 @@ export function CommentsList(props: {
   }
 
   return (
-    <div className={isFetching ? "opacity-50" : "opacity-100"}>
-      <Collapsible
-        open={props.createCommentOpen}
-        onOpenChange={(open) => {
-          console.log(open);
-        }}
-      >
-        <CollapsibleContent asChild>
-          <CreateComment isbn={props.isbn} />
-        </CollapsibleContent>
-      </Collapsible>
+    <Collapsible
+      open={props.createCommentOpen}
+      className="flex flex-col gap-4"
+      style={{ opacity: isFetching ? "opacity-50" : "opacity-100" }}
+      onOpenChange={(open) => {
+        console.log(open);
+      }}
+    >
+      <CollapsibleContent asChild>
+        <CreateComment isbn={props.isbn} />
+      </CollapsibleContent>
 
-      {[...comments, ...comments, ...comments, ...comments].map((comment) => {
+      {comments.map((comment) => {
         if (props.createCommentOpen && me?.id === comment.authorId) {
           return null;
         }
@@ -46,6 +46,6 @@ export function CommentsList(props: {
           />
         );
       })}
-    </div>
+    </Collapsible>
   );
 }
