@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { login } from "../authSlice";
+import { Label } from "@/components/ui/label";
 
 export function Login() {
   const {
@@ -22,7 +23,7 @@ export function Login() {
           login({
             username: data.username,
             password: data.password,
-          }),
+          })
         );
 
         if (login.fulfilled.match(result)) {
@@ -31,10 +32,21 @@ export function Login() {
       })}
     >
       <div className="flex flex-col gap-2">
-        <Input {...register("username", { required: true })} />
-        {errors.username && <p>Username is required.</p>}
-        <Input {...register("password", { required: true })} type="password" />
-        {errors.password && <p>Password is required.</p>}
+        <div className="flex flex-col gap-2 mb-2">
+          <Label htmlFor="username">Username</Label>
+          <Input {...register("username", { required: true })} />
+          {errors.username && <p className="text-sm">Username is required.</p>}
+        </div>
+
+        <div className="flex flex-col gap-2 mb-4">
+          <Label htmlFor="username">Password</Label>
+          <Input
+            {...register("password", { required: true })}
+            type="password"
+          />
+          {errors.password && <p className="text-sm">Password is required.</p>}
+        </div>
+
         <Button type="submit">Login</Button>
       </div>
     </form>

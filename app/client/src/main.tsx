@@ -28,6 +28,7 @@ import { HomePage } from "./pages/HomePage";
 import { LandPage } from "./pages/LandPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { MustBeLoggedInGuard } from "./routing/Guard";
+import { Register } from "./features/auth/register/RegisterComponent";
 
 store.dispatch(tryRestoreSession());
 
@@ -40,6 +41,7 @@ if (container) {
     <React.StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Provider store={store}>
+          <Toaster position="top-center" />
           <BrowserRouter>
             <Routes>
               <Route element={<NavBar />}>
@@ -67,22 +69,20 @@ if (container) {
                   <Route path="auth">
                     <Route element={<AuthPage />}>
                       <Route path="login" element={<Login />} />
-                      <Route path="register" element={<p>register</p>} />
+                      <Route path="register" element={<Register />} />
                     </Route>
                   </Route>
                 </Route>
               </Route>
             </Routes>
           </BrowserRouter>
-
-          <Toaster />
         </Provider>
       </ThemeProvider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 } else {
   throw new Error(
-    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
+    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file."
   );
 }
 
@@ -166,7 +166,7 @@ function NavBar() {
                   asChild
                   className={navigationMenuTriggerStyle()}
                 >
-                  <Link to={"#"}>Register</Link>
+                  <Link to={"/auth/register"}>Register</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>

@@ -1,7 +1,8 @@
 import { backend } from "../../constants";
-import { LoginDto } from "@interfaces/dtos/loginDto";
+import type { LoginDto } from "@interfaces/dtos/loginDto";
+import type { RegisterDto } from "@interfaces/dtos/registerDto";
 
-export async function createLoginRequest(username: string, password: string) {
+export async function createLoginRequest({ username, password }: LoginDto) {
   return fetch(`${backend}/login`, {
     method: "POST",
     credentials: "include",
@@ -12,6 +13,29 @@ export async function createLoginRequest(username: string, password: string) {
       username,
       password,
     } satisfies LoginDto),
+  });
+}
+
+export async function createRegisterRequest({
+  username,
+  password,
+  firstName,
+  lastName,
+  color,
+}: RegisterDto) {
+  return fetch(`${backend}/register`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      password,
+      firstName,
+      lastName,
+      color,
+    } satisfies RegisterDto),
   });
 }
 

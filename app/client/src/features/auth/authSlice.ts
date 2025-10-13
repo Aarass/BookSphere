@@ -3,8 +3,10 @@ import { createAppSlice } from "../../app/createAppSlice";
 import {
   createLoginRequest,
   createLogoutRequest,
+  createRegisterRequest,
   createRestoreRequest,
 } from "./authApi";
+import { toast } from "sonner";
 
 const initialState: {
   status: undefined | "logged_in" | "logged_out";
@@ -31,7 +33,7 @@ export const authSlice = createAppSlice({
         rejected: (state) => {
           state.status = "logged_out";
         },
-      },
+      }
     ),
     login: create.asyncThunk(
       async ({
@@ -41,9 +43,10 @@ export const authSlice = createAppSlice({
         username: string;
         password: string;
       }) => {
-        const res = await createLoginRequest(username, password);
+        const res = await createLoginRequest({ username, password });
 
         if (!res.ok) {
+          toast.error("Wrong email or password");
           throw new Error(`Couldn't log you in`);
         }
       },
@@ -54,7 +57,43 @@ export const authSlice = createAppSlice({
         rejected: (state) => {
           state.status = "logged_out";
         },
+      }
+    ),
+    register: create.asyncThunk(
+      async ({
+        username,
+        password,
+        firstName,
+        lastName,
+        color,
+      }: {
+        username: string;
+        password: string;
+        firstName: string;
+        lastName: string;
+        color: string;
+      }) => {
+        const res = await createRegisterRequest({
+          username,
+          password,
+          firstName,
+          lastName,
+          color,
+        });
+
+        if (!res.ok) {
+          toast.error("Cannot create account");
+          throw new Error(`Couldn't log you in`);
+        }
       },
+      {
+        fulfilled: (state) => {
+          state.status = "logged_in";
+        },
+        rejected: (state) => {
+          state.status = "logged_out";
+        },
+      }
     ),
     logout: create.asyncThunk(
       async (_, thunkApi) => {
@@ -70,7 +109,7 @@ export const authSlice = createAppSlice({
         fulfilled: (state) => {
           state.status = "logged_out";
         },
-      },
+      }
     ),
   }),
   selectors: {
@@ -79,7 +118,7 @@ export const authSlice = createAppSlice({
   },
 });
 
-export const { login, logout, tryRestoreSession } = authSlice.actions;
+export const { login, register, logout, tryRestoreSession } = authSlice.actions;
 
 export const { selectAuthStatus, selectIsLoggedIn } = authSlice.selectors;
 
