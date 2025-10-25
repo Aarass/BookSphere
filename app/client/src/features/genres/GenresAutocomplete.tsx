@@ -15,13 +15,15 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
-import { Control, Controller, FieldValues } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import type { Control, FieldValues } from "react-hook-form";
 import { useGetGenresQuery } from "./genresApi";
-import { Genre } from "@interfaces/genre";
+import type { Genre } from "@interfaces/genre";
 
 export function GenresAutocomplete(props: {
   name: string;
   control: Control<FieldValues, any, FieldValues>;
+  disabled?: boolean;
 }) {
   // name={props.name}
   // control={props.control}
@@ -50,6 +52,7 @@ export function GenresAutocomplete(props: {
         <Popover
           open={open}
           onOpenChange={(open) => {
+            if(props.disabled) return;
             setOpen(open);
             if (!open) {
               onBlur();
@@ -112,7 +115,7 @@ export function GenresAutocomplete(props: {
                             .map((val) => val.id)
                             .includes(genre.id)
                             ? "opacity-100"
-                            : "opacity-0",
+                            : "opacity-0"
                         )}
                       />
                     </CommandItem>

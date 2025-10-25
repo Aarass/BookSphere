@@ -9,8 +9,15 @@ export interface CreateBookDto {
   genreIds: string[];
 }
 
+export interface UpdateBookDto {
+  isbn: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+}
+
 export function isValidCreateBookDto(
-  dto: Partial<CreateBookDto>,
+  dto: Partial<CreateBookDto>
 ): dto is CreateBookDto {
   if (
     !dto.isbn ||
@@ -26,10 +33,19 @@ export function isValidCreateBookDto(
   return true;
 }
 
+export function isValidUpdateBookDto(
+  dto: Partial<UpdateBookDto>
+): dto is UpdateBookDto {
+  if (!dto.isbn || !dto.title || !dto.description || !dto.imageUrl) {
+    return false;
+  }
+  return true;
+}
+
 export type SetReadingStatus = ReadingStatus;
 
 export function isValidSetReadingStatus(
-  dto: Partial<SetReadingStatus>,
+  dto: Partial<SetReadingStatus>
 ): dto is SetReadingStatus {
   if (dto.status === undefined) {
     return false;
@@ -48,7 +64,7 @@ export interface CreateCommentDto {
 }
 
 export function isValidCreateCommentDto(
-  dto: Partial<CreateCommentDto>,
+  dto: Partial<CreateCommentDto>
 ): dto is CreateCommentDto {
   if (!dto.content) {
     return false;
@@ -67,7 +83,7 @@ export interface CreateRatingDto {
 export type UpdateRatingDto = CreateRatingDto;
 
 export function isValidCreateRatingDto(
-  dto: Partial<CreateRatingDto>,
+  dto: Partial<CreateRatingDto>
 ): dto is CreateRatingDto {
   if (dto.value === undefined) {
     return false;
@@ -76,7 +92,7 @@ export function isValidCreateRatingDto(
 }
 
 export function isValidUpdateRatingDto(
-  dto: Partial<UpdateRatingDto>,
+  dto: Partial<UpdateRatingDto>
 ): dto is UpdateRatingDto {
   if (
     dto.value === undefined ||

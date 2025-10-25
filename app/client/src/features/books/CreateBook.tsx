@@ -12,33 +12,68 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CreateBookDto } from "@interfaces/dtos/bookDto";
-import { Genre } from "@interfaces/genre";
+import type { CreateBookDto, UpdateBookDto } from "@interfaces/dtos/bookDto";
+import type { Genre } from "@interfaces/genre";
 import { AlertCircleIcon, ImagePlus } from "lucide-react";
+import type { FieldValues } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { AuthorAutocomplete } from "../authors/AuthorAutocomplete";
 import { GenresAutocomplete } from "../genres/GenresAutocomplete";
-import { useCreateBookMutation } from "./booksApi";
-import { useNavigate } from "react-router";
+import {
+  useCreateBookMutation,
+  useGetBookQuery,
+  useUpdateBookMutation,
+} from "./booksApi";
+import { useNavigate, useParams } from "react-router";
+import { useEffect } from "react";
 
 export function CreateBook() {
-  // const dispatch = useAppDispatch();
-  // const navigate = useNavigate();
-
   const {
     register,
+    reset,
     handleSubmit,
     watch,
     control,
     formState: { errors },
   } = useForm();
 
+  const { isbn } = useParams();
+  const isEditMode = !!isbn;
+  const bookData = useGetBookQuery(isbn || "", { skip: !isEditMode });
+
+  useEffect(() => {
+    if (!bookData || !bookData.data) return;
+
+    reset({
+      isbn: bookData.data.isbn,
+      title: bookData.data.title,
+      description: bookData.data.description,
+      link: bookData.data.imageUrl,
+      author: bookData.data.author,
+      genres: bookData.data.genres,
+    });
+  }, [bookData, reset]);
+
   const navigate = useNavigate();
-  const [createBook, { isLoading }] = useCreateBookMutation();
+  const [createBook, { isLoading: isLoadingCreate }] = useCreateBookMutation();
+  const [updateBook, { isLoading: isLoadingUpdate }] = useUpdateBookMutation();
 
   const linkValue = watch("link");
 
   async function submit(formData: any) {
+    let res;
+
+    if (isEditMode) {
+      res = await update(formData);
+    } else {
+      res = await create(formData);
+    }
+    if (!res.error) {
+      navigate(`/books/${res.data.isbn}`);
+    }
+  }
+
+  async function create(formData: any) {
     const dto: CreateBookDto = {
       isbn: formData.isbn,
       title: formData.title,
@@ -49,9 +84,19 @@ export function CreateBook() {
     };
 
     const res = await createBook(dto);
-    if (!res.error) {
-      navigate("/books");
-    }
+    return res;
+  }
+
+  async function update(formData: any) {
+    const dto: UpdateBookDto = {
+      isbn: formData.isbn,
+      title: formData.title,
+      description: formData.description,
+      imageUrl: formData.link,
+    };
+
+    const res = await updateBook(dto);
+    return res;
   }
 
   const thereIsErrors = Object.values(errors).some(Boolean);
@@ -140,6 +185,17 @@ export function CreateBook() {
         <div>
           <div className="flex flex-col gap-2 w-3xs">
             <>
+              <Label htmlFor="isbn">ISBN</Label>
+              <Input
+                {...register("isbn", {
+                  required: { value: true, message: "ISBN is required" },
+                })}
+                id="isbn"
+                placeholder="ISBN"
+                disabled={isEditMode}
+              />
+            </>
+            <>
               <Label htmlFor="title">Title</Label>
               <Input
                 {...register("title", {
@@ -151,24 +207,21 @@ export function CreateBook() {
             </>
 
             <>
-              <Label htmlFor="isbn">ISBN</Label>
-              <Input
-                {...register("isbn", {
-                  required: { value: true, message: "ISBN is required" },
-                })}
-                id="isbn"
-                placeholder="ISBN"
+              <Label htmlFor="author">Author</Label>
+              <AuthorAutocomplete
+                control={control}
+                name="author"
+                disabled={isEditMode}
               />
             </>
 
             <>
-              <Label htmlFor="author">Author</Label>
-              <AuthorAutocomplete control={control} name="author" />
-            </>
-
-            <>
               <Label htmlFor="genres">Genres</Label>
-              <GenresAutocomplete control={control} name="genres" />
+              <GenresAutocomplete
+                control={control}
+                name="genres"
+                disabled={isEditMode}
+              />
             </>
 
             <>
@@ -185,9 +238,9 @@ export function CreateBook() {
             <Button
               className="mt-5"
               type="submit"
-              disabled={isLoading || thereIsErrors}
+              disabled={isLoadingCreate || isLoadingUpdate || thereIsErrors}
             >
-              Create
+              {isEditMode ? "Update" : "Create"}
             </Button>
           </div>
         </div>

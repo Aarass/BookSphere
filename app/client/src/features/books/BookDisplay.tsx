@@ -1,4 +1,4 @@
-import { Book } from "@interfaces/book";
+import type { Book } from "@interfaces/book";
 import { BookStats } from "./BookStats";
 import { RateBook } from "./rating/RateBook";
 import { MyReadingStatus } from "./MyReadingStatus";
@@ -13,9 +13,25 @@ import {
 } from "@/components/ui/tooltip";
 import { AddBookToPicks } from "./picks/AddBookToPicks";
 import { GenresDisplay } from "./GenresDisplay";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router";
+import { useDeleteBookMutation } from "./booksApi";
 
 export function BookDisplay({ book }: { book: Book }) {
   const [pressed, setPressed] = useState(false);
+  const navigate = useNavigate();
+
+  const [deleteBookAction] = useDeleteBookMutation();
+
+  const deleteClickHandler = async () => {
+    const res = await deleteBookAction(book.isbn);
+
+    if ("error" in res) {
+      return;
+    }
+
+    navigate("/books");
+  };
 
   return (
     <div className="grid grid-cols-[fit-content_fit-content] grid-rows-[auto_min-content_1fr] gap-4 w-fit mx-auto h-full">
@@ -56,6 +72,24 @@ export function BookDisplay({ book }: { book: Book }) {
         </div>
 
         <p className="my-6">{book.description}</p>
+
+        <div className="flex flex-row gap-4">
+          <Button
+            onClick={() => {
+              navigate(`/books/edit/${book.isbn}`);
+            }}
+          >
+            Edit Book
+          </Button>
+          <Button
+            variant={"destructive"}
+            onClick={() => {
+              deleteClickHandler();
+            }}
+          >
+            Delete Book
+          </Button>
+        </div>
       </div>
 
       <div className="flex justify-center gap-4">

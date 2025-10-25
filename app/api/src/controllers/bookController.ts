@@ -3,6 +3,7 @@ import {
   isValidCreateCommentDto,
   isValidCreateRatingDto,
   isValidSetReadingStatus,
+  isValidUpdateBookDto,
   isValidUpdateCommentDto,
   isValidUpdateRatingDto,
 } from "@interfaces/dtos/bookDto";
@@ -23,6 +24,31 @@ router.post("/books", async (req, res, next) => {
 
   try {
     const book = await bookService.createBook(body);
+    res.status(201).send(book);
+  } catch (err) {
+    {
+      const e = err as {
+        type: string;
+        message: string;
+      };
+      if (e.type !== undefined && e.type == "customError") {
+        return next(createHttpError(500, e.message));
+      }
+    }
+
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.put("/books", async (req, res, next) => {
+  const body = req.body;
+  if (!isValidUpdateBookDto(body)) {
+    return next(createHttpError(400, `Bad request`));
+  }
+
+  try {
+    const book = await bookService.updateBook(body);
     res.status(201).send(book);
   } catch (err) {
     {

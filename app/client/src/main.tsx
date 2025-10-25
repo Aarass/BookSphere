@@ -53,6 +53,7 @@ if (container) {
                       <Route index element={<BookList />} />
                       <Route path=":isbn" element={<Book />} />
                       <Route path="create" element={<CreateBook />} />
+                      <Route path="edit/:isbn" element={<CreateBook />} />
                     </Route>
 
                     <Route path="clubs">

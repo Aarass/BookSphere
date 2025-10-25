@@ -36,6 +36,7 @@ class LeaderboardRepository {
     }
   }
 
+
   async onBookDeleted(book: Book) {
     let redis;
     try {

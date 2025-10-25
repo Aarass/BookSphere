@@ -10,7 +10,7 @@ class BookRepository {
     description: string,
     imageUrl: string,
     authorId: string,
-    genreIds: string[],
+    genreIds: string[]
   ) {
     const session = getSession();
     let newBook;
@@ -36,7 +36,7 @@ class BookRepository {
             imageUrl,
             authorId,
             genreIds,
-          },
+          }
         );
 
         const updates = result.summary.counters.updates();
@@ -68,6 +68,81 @@ class BookRepository {
     return newBook;
   }
 
+  // async updateComment(isbn: string, userId: string, newContent: string) {
+  //   const session = getSession();
+  //   let result;
+
+  //   try {
+  //     result = await session.run(
+  //       `MATCH (:User {id: $userId})-[r:HAS_COMMENTED]->(:Book {isbn: $isbn})
+  //        SET r.comment = $content, r.timestamp = $timestamp`,
+  //       {
+  //         userId,
+  //         isbn,
+  //         timestamp: Date.now(),
+  //         content: newContent,
+  //       },
+  //     );
+  //   } finally {
+  //     await session.close();
+  //   }
+
+  //   const updates = result.summary.counters.updates();
+
+  //   if (updates.propertiesSet !== 2) {
+  //     console.error(
+  //       `Error updating comment. Expected 2# properties set. Instead set ${updates.propertiesSet}# properties`,
+  //     );
+  //     throw "Couldn't update comment";
+  //   }
+  // }
+
+  async updateBook(
+    isbn: string,
+    title: string,
+    description: string,
+    imageUrl: string
+  ) {
+    const session = getSession();
+    try {
+      const result = await session.executeWrite(async (tx) => {
+        const existingBook = await tx.run(
+          `MATCH (b:Book {isbn: $isbn}) RETURN b `,
+          { isbn }
+        );
+
+        if (existingBook.records.length === 0) {
+          throw new Error(`Book with ISBN ${isbn} not found`);
+        }
+
+        const result = await tx.run(
+          `
+        MATCH (b:Book {isbn: $isbn})
+        
+        // Update book properties
+        SET b.title = $title,
+            b.description = $description,
+            b.imageUrl = $imageUrl
+        
+        RETURN ${toRawBook("b")}  
+        `,
+          {
+            isbn,
+            title,
+            description,
+            imageUrl,
+          }
+        );
+
+        return result.records[0].toObject() as Book;
+      });
+
+      return result;
+    } finally {
+      await session.close();
+    }
+  }
+
   async getByISBN(isbn: string) {
     let result;
 
@@ -76,7 +151,7 @@ class BookRepository {
       result = await query<Book>(
         session,
         `MATCH (a:Author)-[:WROTE]->(b:Book {isbn: $isbn}) return ${toBook("b", "a")}`,
-        { isbn },
+        { isbn }
       );
     } finally {
       await session.close();
@@ -96,7 +171,7 @@ class BookRepository {
       const result = await query<Book>(
         session,
         `MATCH (a:Author)-[:WROTE]->(b:Book) RETURN ${toBook("b", "a")}`,
-        {},
+        {}
       );
 
       return result;
@@ -107,7 +182,7 @@ class BookRepository {
 
   async getBooksWithReadingStatus(
     userId: string,
-    status: ReadingStatus["status"],
+    status: ReadingStatus["status"]
   ) {
     const session = getSession();
 
@@ -115,7 +190,7 @@ class BookRepository {
       const result = await query<BookRaw>(
         session,
         `MATCH (u:User {id: $userId})-[:IS_READING {status: $status}]->(b:Book) RETURN ${toRawBook("b")}`,
-        { userId, status },
+        { userId, status }
       );
 
       return result;
@@ -141,7 +216,7 @@ class BookRepository {
         RETURN book`,
         {
           isbn,
-        },
+        }
       );
 
       if (result.records.length != 1) {
@@ -164,7 +239,7 @@ class BookRepository {
         {
           userId,
           isbn,
-        },
+        }
       );
 
       if (result.length === 0) {
@@ -188,7 +263,7 @@ class BookRepository {
   async setReadingStatus(
     isbn: string,
     userId: string,
-    status: ReadingStatus["status"],
+    status: ReadingStatus["status"]
   ) {
     const neo4j = getSession();
     let result;
@@ -200,7 +275,7 @@ class BookRepository {
               WITH r, b, r.status as oldStatus
               DELETE r 
               RETURN ${toGenreIds("b")}, oldStatus`,
-            { isbn, userId },
+            { isbn, userId }
           );
           break;
         case "reading":
@@ -212,7 +287,7 @@ class BookRepository {
               MERGE (u)-[r:IS_READING]->(b)
               SET r.status = $status
               RETURN ${toGenreIds("b")}, oldStatus`,
-            { isbn, userId, status },
+            { isbn, userId, status }
           );
           break;
         default:
@@ -250,7 +325,7 @@ class BookRepository {
           userId,
           isbn,
           content,
-        },
+        }
       );
     } finally {
       await neo4j.close();
@@ -276,7 +351,7 @@ class BookRepository {
           isbn,
           timestamp: Date.now(),
           content: newContent,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -286,7 +361,7 @@ class BookRepository {
 
     if (updates.propertiesSet !== 2) {
       console.error(
-        `Error updating comment. Expected 2# properties set. Instead set ${updates.propertiesSet}# properties`,
+        `Error updating comment. Expected 2# properties set. Instead set ${updates.propertiesSet}# properties`
       );
       throw "Couldn't update comment";
     }
@@ -302,7 +377,7 @@ class BookRepository {
         {
           userId,
           isbn,
-        },
+        }
       );
 
       const updates = result.summary.counters.updates();
@@ -324,7 +399,7 @@ class BookRepository {
         session,
         `MATCH (u:User)-[r:HAS_COMMENTED]->(b:Book {isbn: $isbn})
         RETURN ${toComment("r", "u", "b")}`,
-        { isbn },
+        { isbn }
       );
 
       return result;
@@ -340,7 +415,7 @@ class BookRepository {
         session,
         `MATCH (u:User {id: $userId})-[r:HAS_COMMENTED]->(b:Book {isbn: $isbn})
         RETURN ${toComment("r", "u", "b")}`,
-        { userId, isbn },
+        { userId, isbn }
       );
 
       if (result.length > 1) {
@@ -369,7 +444,7 @@ class BookRepository {
           userId,
           isbn,
           value,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -389,7 +464,7 @@ class BookRepository {
 
   async deleteRating(
     isbn: string,
-    userId: string,
+    userId: string
   ): Promise<{ genreIds: string[]; value: number }> {
     const session = getSession();
     let result;
@@ -400,7 +475,7 @@ class BookRepository {
         WITH b, r, r.value AS value
         DELETE r
         RETURN ${toGenreIds("b")}, value`,
-        { userId, isbn },
+        { userId, isbn }
       );
     } finally {
       await session.close();
@@ -422,7 +497,7 @@ class BookRepository {
   async updateRating(
     isbn: string,
     userId: string,
-    value: number,
+    value: number
   ): Promise<{ genreIds: string[]; oldValue: number }> {
     const session = getSession();
     let result;
@@ -433,7 +508,7 @@ class BookRepository {
         WITH b, r,  r.value AS oldValue
         SET r.value = $value
         RETURN ${toGenreIds("b")}, oldValue`,
-        { userId, isbn, value },
+        { userId, isbn, value }
       );
     } finally {
       await session.close();
@@ -462,7 +537,7 @@ class BookRepository {
         {
           userId,
           isbn,
-        },
+        }
       );
 
       if (result.length > 1) {
@@ -480,7 +555,7 @@ class BookRepository {
   }
 
   async mapToBooksWithScore(
-    scoresAndISBNs: { score: number; value: string }[],
+    scoresAndISBNs: { score: number; value: string }[]
   ) {
     const session = getSession();
     try {
@@ -490,7 +565,7 @@ class BookRepository {
         WITH scoreAndISBN.value as isbn, scoreAndISBN.score as score
         MATCH (a:Author)-[:WROTE]->(b:Book {isbn: isbn})
         RETURN ${toBook("b", "a")}, score`,
-        { scoresAndISBNs },
+        { scoresAndISBNs }
       );
 
       return result;
@@ -507,7 +582,7 @@ class BookRepository {
       MATCH (b:Book)-[:BELONGS_TO]->(:Genre {name: $genre})
       RETURN b.isbn AS isbn
       `,
-        { genre },
+        { genre }
       );
 
       return result.records.map((record: any) => record.get("isbn"));
@@ -542,7 +617,7 @@ export function toRawBook(bookVar: string) {
 function toComment(
   commentRelationVar: string,
   userVar: string,
-  bookVar: string,
+  bookVar: string
 ) {
   return `
     ${bookVar}.isbn as bookISBN,
@@ -560,69 +635,69 @@ function toRating(ratingRelationVar: string, userVar: string, bookVar: string) {
   `;
 }
 
-async function tests() {
-  if (false) {
-    let tmp = await bookRepository.getAll();
-    console.log(tmp);
-  }
+// async function tests() {
+//   if (false) {
+//     let tmp = await bookRepository.getAll();
+//     console.log(tmp);
+//   }
 
-  if (false) {
-    let tmp = await bookRepository.getByISBN("0-7567-5189-6");
-    console.log(tmp);
-  }
+//   if (false) {
+//     let tmp = await bookRepository.getByISBN("0-7567-5189-6");
+//     console.log(tmp);
+//   }
 
-  if (false) {
-    await bookRepository.setReadingStatus(
-      "0-7567-5189-6",
-      "43eb72c0-c592-49ed-9def-00f28a076159",
-      true,
-    );
-  }
+//   if (false) {
+//     await bookRepository.setReadingStatus(
+//       "0-7567-5189-6",
+//       "43eb72c0-c592-49ed-9def-00f28a076159",
+//       true
+//     );
+//   }
 
-  if (false) {
-    await bookRepository.setReadingStatus(
-      "0-7567-5189-6",
-      "43eb72c0-c592-49ed-9def-00f28a076159",
-      false,
-    );
-  }
+//   if (false) {
+//     await bookRepository.setReadingStatus(
+//       "0-7567-5189-6",
+//       "43eb72c0-c592-49ed-9def-00f28a076159",
+//       false
+//     );
+//   }
 
-  if (false) {
-    let tmp = await bookRepository.createComment(
-      "0-7567-5189-6",
-      "43eb72c0-c592-49ed-9def-00f28a076159",
-      "U sto knjiga..",
-    );
-    console.log(tmp);
-  }
+//   if (false) {
+//     let tmp = await bookRepository.createComment(
+//       "0-7567-5189-6",
+//       "43eb72c0-c592-49ed-9def-00f28a076159",
+//       "U sto knjiga.."
+//     );
+//     console.log(tmp);
+//   }
 
-  if (false) {
-    let tmp = await bookRepository.getComments("0-7567-5189-6");
-    console.log(tmp);
-  }
+//   if (false) {
+//     let tmp = await bookRepository.getComments("0-7567-5189-6");
+//     console.log(tmp);
+//   }
 
-  if (false) {
-    await bookRepository.createRating(
-      "0-7567-5189-6",
-      "43eb72c0-c592-49ed-9def-00f28a076159",
-      3,
-    );
-  }
+//   if (false) {
+//     await bookRepository.createRating(
+//       "0-7567-5189-6",
+//       "43eb72c0-c592-49ed-9def-00f28a076159",
+//       3
+//     );
+//   }
 
-  if (false) {
-    let tmp = await bookRepository.getRating(
-      "0-7567-5189-6",
-      "43eb72c0-c592-49ed-9def-00f28a076159",
-    );
-    console.log(tmp);
-  }
+//   if (false) {
+//     let tmp = await bookRepository.getRating(
+//       "0-7567-5189-6",
+//       "43eb72c0-c592-49ed-9def-00f28a076159"
+//     );
+//     console.log(tmp);
+//   }
 
-  if (false) {
-    bookRepository.createBook("1", "Title", "Description", "asd.jpg", "1", [
-      "2",
-    ]);
-  }
-}
+//   if (false) {
+//     bookRepository.createBook("1", "Title", "Description", "asd.jpg", "1", [
+//       "2",
+//     ]);
+//   }
+// }
 
 // (async () => {
 //   try {

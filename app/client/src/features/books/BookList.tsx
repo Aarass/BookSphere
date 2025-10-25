@@ -21,14 +21,14 @@ export function BookList() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2 p-4">
+      {books.map((book) => (
+        <SmallBookDisplay book={book} key={book.isbn} />
+      ))}
       <Button className="w-full h-auto aspect-(--cover) p-0 m-0" asChild>
         <Link to="/books/create">
           <Plus />
         </Link>
       </Button>
-      {books.map((book) => (
-        <SmallBookDisplay book={book} key={book.isbn} />
-      ))}
     </div>
   );
 }

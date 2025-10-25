@@ -1,8 +1,11 @@
 import { api } from "@/app/store";
-import { redirect } from "react-router";
-import { Book, BookRaw, ReadingStatus } from "@interfaces/book";
-import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
-import { User } from "@interfaces/user";
+import type { Book, BookRaw, ReadingStatus } from "@interfaces/book";
+import type {
+  CreateBookDto,
+  SetReadingStatus,
+  UpdateBookDto,
+} from "@interfaces/dtos/bookDto";
+import type { User } from "@interfaces/user";
 import { toast } from "sonner";
 
 export const apiWithBooks = api.injectEndpoints({
@@ -48,6 +51,25 @@ export const apiWithBooks = api.injectEndpoints({
           toast("Successfully created a book");
         } catch {
           toast("There was an error while trying to create a book");
+        }
+      },
+    }),
+    updateBook: builder.mutation<Book, UpdateBookDto>({
+      query: (payload) => ({
+        url: `/books`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: (result) => [
+        { type: "Book", id: "LIST" },
+        { type: "Book", id: result?.isbn || "LIST" },
+      ],
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          toast("Successfully updated a book");
+        } catch {
+          toast("There was an error while trying to update a book");
         }
       },
     }),
@@ -118,6 +140,7 @@ export const {
   useGetCompletedBooksQuery,
   useGetRecommendedBooksQuery,
   useCreateBookMutation,
+  useUpdateBookMutation,
   useDeleteBookMutation,
   useGetBookStatsQuery,
   useGetBookReadingStatusQuery,

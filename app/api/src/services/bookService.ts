@@ -1,5 +1,9 @@
 import { ReadingStatus } from "@interfaces/book";
-import { CreateBookDto, SetReadingStatus } from "@interfaces/dtos/bookDto";
+import {
+  CreateBookDto,
+  SetReadingStatus,
+  UpdateBookDto,
+} from "@interfaces/dtos/bookDto";
 import { bookRepository } from "../repositories/bookRepository";
 import { leaderboardRepository } from "../repositories/leaderboardRepository";
 import { statsRepository } from "../repositories/statsRepository";
@@ -12,12 +16,23 @@ async function createBook(dto: CreateBookDto) {
     dto.description,
     dto.imageUrl,
     dto.authorId,
-    dto.genreIds,
+    dto.genreIds
   );
 
   setImmediate(async () => {
     leaderboardRepository.onBookCreated(book);
   });
+
+  return book;
+}
+
+async function updateBook(dto: UpdateBookDto) {
+  const book = await bookRepository.updateBook(
+    dto.isbn,
+    dto.title,
+    dto.description,
+    dto.imageUrl
+  );
 
   return book;
 }
@@ -51,7 +66,7 @@ async function deleteBook(isbn: string) {
 
 async function getReadingStatus(
   isbn: string,
-  userId: string,
+  userId: string
 ): Promise<ReadingStatus> {
   return await bookRepository.getReadingStatus(isbn, userId);
 }
@@ -65,12 +80,12 @@ async function getReadingStatus(
 async function setReadingStatus(
   isbn: string,
   userId: string,
-  dto: SetReadingStatus,
+  dto: SetReadingStatus
 ) {
   const { previousValue, genreIds } = await bookRepository.setReadingStatus(
     isbn,
     userId,
-    dto.status,
+    dto.status
   );
 
   if (previousValue === dto.status) return; // no need to update leaderboards
@@ -99,7 +114,7 @@ async function setReadingStatus(
     await leaderboardRepository.updateReadersLeaderboards(
       isbn,
       genreIds,
-      status,
+      status
     );
   });
 }
@@ -110,6 +125,7 @@ async function getStats(isbn: string) {
 
 export default {
   createBook,
+  updateBook,
   getBookByISBN,
   getAllBooks,
   getCurrentlyReadingBooks,

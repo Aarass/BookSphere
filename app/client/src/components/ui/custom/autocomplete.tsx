@@ -24,7 +24,8 @@ export function Autocomplete<T extends { id: string }>(
     entries: T[];
     entryDisplayFn: (_: T) => string;
     placeholder: string;
-  } & ({ required: true; errorMessage: string } | { required?: undefined }),
+    disabled?: boolean;
+  } & ({ required: true; errorMessage: string } | { required?: undefined })
 ) {
   const [open, setOpen] = useState(false);
 
@@ -43,6 +44,7 @@ export function Autocomplete<T extends { id: string }>(
         <Popover
           open={open}
           onOpenChange={(open) => {
+            if (props.disabled) return;
             setOpen(open);
             if (!open) {
               onBlur();
@@ -91,7 +93,7 @@ export function Autocomplete<T extends { id: string }>(
                       <Check
                         className={cn(
                           "ml-auto",
-                          value?.id === entry.id ? "opacity-100" : "opacity-0",
+                          value?.id === entry.id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
