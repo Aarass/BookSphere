@@ -40,7 +40,7 @@ export function SmallBookDisplay({ book }: { book: BookRaw }) {
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() => {
-            alert("Not Implemented Yet");
+            navigate(`/books/edit/${book.isbn}`)
           }}
         >
           <Pencil />
