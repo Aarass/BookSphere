@@ -16,6 +16,7 @@ export const api = createApi({
     "BookStats",
     "MyBookRating",
     "BookComment",
+    "BookNote",
     "BookReadingStatus",
     "BookList",
     "UserPicks",

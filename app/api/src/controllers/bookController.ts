@@ -13,6 +13,13 @@ import { authenticate } from "../middlewares/authenticate";
 import bookService from "../services/bookService";
 import commentService from "../services/commentService";
 import ratingService from "../services/ratingService";
+import { bookNotesService } from "../services/bookNotesService";
+import {
+  AddBookNoteDto,
+  CreateBookNoteDto,
+  DeleteBookNoteDto,
+  UpdateBookNoteDto,
+} from "@interfaces/dtos/bookNotesDto";
 
 let router = express.Router();
 
@@ -114,7 +121,7 @@ router.get(
       console.error(err);
       return next(createHttpError(500, `Something went wrong`));
     }
-  },
+  }
 );
 
 router.put(
@@ -136,7 +143,7 @@ router.put(
       console.error(err);
       return next(createHttpError(500, `Something went wrong`));
     }
-  },
+  }
 );
 
 router.post("/books/:isbn/comments", authenticate, async (req, res, next) => {
@@ -214,7 +221,7 @@ router.delete(
       console.error(err);
       return next(createHttpError(500, `Something went wrong`));
     }
-  },
+  }
 );
 
 router.post("/books/:isbn/ratings", authenticate, async (req, res, next) => {
@@ -265,6 +272,112 @@ router.delete("/books/:isbn/ratings", authenticate, async (req, res, next) => {
     return next(createHttpError(500, `Something went wrong`));
   }
 });
+
+router.post("/books/:isbn/note", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  const noteSettings = req.body;
+
+  try {
+    const bookHasNotes = await bookNotesService.getBookNotes(userId, isbn);
+
+    if (!bookHasNotes) {
+      await bookNotesService.createBookNote(userId, isbn);
+    }
+
+    const bookNote: AddBookNoteDto = {
+      isbn,
+      userId: userId,
+      page: noteSettings.page,
+      description: noteSettings.description,
+    };
+
+    await bookNotesService.addBookNote(bookNote);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.get("/books/:isbn/note", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  try {
+    const notes = await bookNotesService.getBookNotes(userId, isbn);
+    res.status(200).send(notes);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.get("/books/:isbn/note/:id", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const noteId = req.params["id"];
+  const userId = req.session.data.userId!;
+
+  try {
+    const note = await bookNotesService.getSpecificBookNote(
+      noteId,
+      userId,
+      isbn
+    );
+    res.status(200).send(note);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.put("/books/:isbn/note", authenticate, async (req, res, next) => {
+  const isbn = req.params["isbn"];
+  const userId = req.session.data.userId!;
+
+  const noteSettings = req.body;
+
+  const updateBookData: UpdateBookNoteDto = {
+    isbn,
+    userId,
+    noteId: noteSettings.noteId,
+    description: noteSettings.description,
+    page: noteSettings.page,
+  };
+
+  try {
+    await bookNotesService.updateBookNote(updateBookData);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    return next(createHttpError(500, `Something went wrong`));
+  }
+});
+
+router.delete(
+  "/books/:isbn/note/:noteId",
+  authenticate,
+  async (req, res, next) => {
+    const isbn = req.params["isbn"];
+    const noteId = req.params["noteId"];
+    const userId = req.session.data.userId!;
+
+    const deleteBookData: DeleteBookNoteDto = {
+      isbn,
+      userId,
+      noteId,
+    };
+
+    try {
+      await bookNotesService.deleteNote(deleteBookData);
+      res.sendStatus(200);
+    } catch (err) {
+      console.error(err);
+      return next(createHttpError(500, `Something went wrong`));
+    }
+  }
+);
 
 router.get("/books/:isbn/ratings/my", authenticate, async (req, res, next) => {
   const isbn = req.params["isbn"];

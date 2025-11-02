@@ -8,7 +8,7 @@ const COLLECTION_NAME = "userRecommendationLists";
 class UserRecommendationRepository {
   async createList(
     neo4jUserId: string,
-    description: string,
+    description: string
   ): Promise<UserRecommendationListDto> {
     const db = getDb();
     const now = new Date();
@@ -39,7 +39,7 @@ class UserRecommendationRepository {
           _id: new ObjectId(listId),
           neo4jUserId: userId,
         },
-        { $push: { bookIsbns: isbn } },
+        { $push: { bookIsbns: isbn } }
       );
   }
 
@@ -53,12 +53,12 @@ class UserRecommendationRepository {
           _id: new ObjectId(listId),
           neo4jUserId: userId,
         },
-        { $pull: { bookIsbns: isbn } },
+        { $pull: { bookIsbns: isbn } }
       );
   }
 
   async getListsByUserId(
-    neo4jUserId: string,
+    neo4jUserId: string
   ): Promise<UserRecommendationListDto[]> {
     const db = getDb();
     const results = await db
@@ -85,4 +85,3 @@ class UserRecommendationRepository {
 }
 
 export const userRecommendationRepository = new UserRecommendationRepository();
-
