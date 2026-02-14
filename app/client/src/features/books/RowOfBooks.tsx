@@ -50,7 +50,7 @@ export function RowOfBooks({
             </CarouselContent>
           </Carousel>
         ) : (
-          <div className="flex flex-1 items-center justify-center h-48 opacity-50">
+          <div className="flex flex-1 items-center justify-center h-full opacity-50">
             <p>{noBooksMessage}</p>
           </div>
         )}

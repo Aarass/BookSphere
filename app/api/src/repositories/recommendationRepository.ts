@@ -6,7 +6,6 @@ class RecommendationRepository {
   async basedOnFavoriteBook(userId: string): Promise<BookRaw[]> {
     const session = getSession();
 
-    // TODO: Ovo je prototip mora da se izmeni malo ali i ovo prolazi
     const result = await session.executeRead(async (tx) => {
       return await tx.run(
         `
@@ -111,4 +110,3 @@ class RecommendationRepository {
 }
 
 export const recommendationRepository = new RecommendationRepository();
-
